@@ -1,6 +1,6 @@
 {
   "name": "ai-product",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
@@ -12,9 +12,9 @@
     "lint": "ng lint",
     "version": "node -p \"require('./package.json').version\"",
     "prepare": "husky",
-  "release:patch": "node ./scripts/release.js patch && npm run release:push",
-  "release:minor": "node ./scripts/release.js minor && npm run release:push",
-  "release:major": "node ./scripts/release.js major && npm run release:push",
+    "release:patch": "node ./scripts/release.js patch && npm run release:push",
+    "release:minor": "node ./scripts/release.js minor && npm run release:push",
+    "release:major": "node ./scripts/release.js major && npm run release:push",
     "release:push": "git push --follow-tags origin HEAD"
   },
   "standard-version": {
