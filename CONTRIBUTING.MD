@@ -7,6 +7,72 @@ _Last updated: 2025-08-12_
 
 ---
 
+# 🚀 Commit & Release Guide
+
+## ✅ Commits (Conventional Commits)
+
+**Format**
+
+```
+type(scope?): subject
+```
+
+**Types:** `feat` | `fix` | `docs` | `style` | `refactor` | `perf` | `test` | `build` | `ci` | `chore` | `revert`
+
+**Examples**
+
+```bash
+feat(auth): add refresh token flow
+fix(ui): prevent double submit on Enter
+docs(readme): add quick start
+refactor(forms): split dynamic fields into subcomponents
+```
+
+**Mechanism**
+
+Commit messages are auto-checked at commit time; non-conforming messages are rejected.
+
+---
+
+## 🚀 Versioning & Releases
+
+Use these commands to bump the version (SemVer), tag it, and generate **JSON** release notes:
+
+```bash
+npm run release:patch   # 1.0.0 -> 1.0.1
+npm run release:minor   # 1.0.0 -> 1.1.0
+npm run release:major   # 1.0.0 -> 2.0.0
+```
+
+**Optional custom release commit message** (`%s` becomes the version):
+
+```bash
+npm run release:patch -- -m "chore(release): v%s – short note"
+```
+
+### What happens under the hood
+
+- Bumps `package.json` via **standard-version**
+- Creates a Git tag: `vX.Y.Z`
+- Generates machine-readable notes at:  
+  `release-notes/release-vX.Y.Z.json`
+- Commits the JSON notes
+- Pushes `HEAD` + tags (via `release:push`)
+
+### No-push workflow
+
+```bash
+npm run release:patch:nopush
+npm run release:minor:nopush
+npm run release:major:nopush
+# then:
+npm run release:push
+```
+
+### JSON notes
+
+The generated JSON includes basic stats and grouped sections (features, fixes, breaking changes, etc.) derived from Conventional Commits.
+
 
 ## 0) Principles
 
