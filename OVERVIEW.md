@@ -40,11 +40,13 @@ Workload (est.): **S ≤1d**, **M 2–3d**, **L 4–7d**, **XL >1wk**
 | Headers | Security headers (HSTS, COOP, CORP, XFO) | 🟡 | P1 | S | Some present; finalize full set. | Nginx conf | Add/verify all headers | SEC/DEVOPS |
 | CORS | API CORS locked to SPA origin | 🟡 | P1 | S | Should allow only SPA origin. | API gateway/config | Review and restrict origins | API/SEC |
 | CI/CD | CSP smoke test | 🟡 | P2 | S | Snippet provided; add as a job. | Pipelines | Implement & gate builds | DEVOPS |
+| Core | Barrels | ❌ | P1 | M | Expose all the components, utils, as Barrels. | `src//**` (Barrels) | Some components are ok, but many of them are not correctly such as NGRX, FOrm components imported and some are not existing yet such as Services, utils, etc... | FE |
 | Core | Features & Menus per-tenant via config | ❌ | P1 | M | Feature flags + menu rendering per tenant/role. | `public/assets/config.*.json`, `ConfigService`, `FeatureService` | Implement FeatureService, guards, menu binding | FE |
 | Core | Single-tenant & Multi-tenant support | ❌ | P1 | M | Tenant claim + allow-list per feature. | `public/assets/config.*.json`, `ConfigService` | Add Keycloak tenant claim; config overlays | FE |
 | Core | Cloud & On-Prem compatibility | ❌ | P2 | M | Bundle external assets for offline/no-internet installs. | `public/assets/**` | Remove external URLs; vendor fonts/libs | FE |
 | CI/CD | Dependency scan (npm audit/Snyk) | ❌ | P1 | S | Block high/critical vulns. | Pipelines | Add job & thresholds | DEVOPS/SEC |
 | UI | Fonts & External resources vendored | ❌ | P2 | M | Package fonts/libs in app for offline. | `fonts/`, external libs | Replace http URLs; ensure licensing | FE |
+| UI | Luxon Date formatting | ❌ | P2 | s | Include Luxon to manage all dates | `utils/**` | customize dates display and management | FE |
 | UI | Storybook | ❌ | P2 | M | Isolated docs/dev for components; a11y. | `.storybook/**`, `src/app/shared/forms/**` | Init Storybook; write stories; run in CI | FE |
 | Testing | Unit tests | ❌ | P1 | M | Services, guards, FeatureService, validators. Coverage gates. | `src/**/*.spec.ts`, `jest.config.ts` | Add tests; set ≥80% thresholds in CI | FE/QA |
 | Realtime | SSE / WebSocket | ❌ | P2 | L | Realtime via BFF; SSE first, WS optional. | `bff/src/realtime/**`, `src/app/core/realtime/**` | Define event model; heartbeat; auth via session | BE/FE |

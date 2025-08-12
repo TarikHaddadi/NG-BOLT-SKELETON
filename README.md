@@ -493,6 +493,18 @@ This project uses Angular strict mode (`strict: true`) and TypeScript with:
 
 ---
 
+
+## Documentation Index
+- [Global Overview](./OVERVIEW.md)
+- [Contribution Guide](./CONTRIBUTING.MD)
+- [Change log](./CHANGELOG.md.MD)
+- [Forms Module](src/app/shared/forms/README-FORMS.md)
+- [Environment Config Upgrade Custom  Config – V1](src/app/core/services/README-ENV-CONFIG-UPGRADE-V1.MD)
+- [Environment Config – Upgrade BFF V2](src/app/core/services/README-ENV-CONFIG-UPGRADE-V2-BBF.MD)
+- [Authentication Flow](src/app/core/auth/README-CURRENT-AUTH.MD)
+- [Authentication Flow Upgrade BFF](src/app/core/auth/README-AUTH-UPGRADE-V2-BFF.MD)
+
+
 ## 🧑‍💻 Author
 
 **AI Product Skeleton**  
