@@ -1,5 +1,5 @@
 // src/app/layout/app-layout.component.ts
-import { AfterViewInit, ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { AfterViewInit, ChangeDetectorRef, Component, effect, Injector, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatToolbarModule } from '@angular/material/toolbar';
@@ -10,6 +10,13 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatListModule } from '@angular/material/list';
 import { LayoutService } from '../../core/services/layout.service';
 import { Observable } from 'rxjs';
+import { ConfigService } from '../../core/services/config.service';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { ThemeService } from '../../core/services/theme.service';
+import { FieldConfig } from '../forms/field-config.model';
+import { FormControl } from '@angular/forms';
+import { SelectComponent } from '../forms/fields/select/select.component';
+import { ToggleComponent } from '../forms/fields/toggle/toggle.component';
 
 @Component({
   selector: 'app-layout',
@@ -23,23 +30,58 @@ import { Observable } from 'rxjs';
     MatButtonModule,
     RouterModule,
     MatTooltipModule,
-    MatListModule
+    MatListModule,
+    TranslateModule,
+    SelectComponent,
+    ToggleComponent
   ],
   templateUrl: './app-layout.component.html',
-  styleUrl: './app-layout.component.scss',
+  styleUrls: ['./app-layout.component.scss'],
 })
 export class AppLayoutComponent implements OnInit, AfterViewInit {
   public menuItems = [
-    { label: 'Dashboard', icon: 'dashboard', route: '/dashboard' },
-    { label: 'Team', icon: 'group', route: '/team' },
+    { label: 'DASHBOARD_TITLE', icon: 'dashboard', route: '/dashboard' },
+    { label: 'TEAM_MEMBERS', icon: 'group', route: '/team' },
   ];
   public isOpen = true;
   public title$!: Observable<string>;
+  public version!: string;
+
+  // Theme toggle config
+  public themeField: FieldConfig = {
+    name: 'themeSwitcher',
+    label: 'form.labels.themeSwitcher',
+    type: 'toggle',
+      color: 'accent',
+      toggleIcons: {
+    on: 'dark_mode',
+    off: 'light_mode',
+    position: 'start' 
+  }
+  };
+  public themeControl!: FormControl<boolean>;
+
+  // Language select config
+  public langField: FieldConfig = {
+    name: 'language',
+    label: 'form.labels.language',
+    type: 'dropdown',
+    options: [
+      { label: 'English', value: 'en' },
+      { label: 'Français', value: 'fr' }
+    ]
+  };
+  public langControl!: FormControl<string>;
 
   constructor(
     private layoutService: LayoutService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private configService: ConfigService,
+    public translate: TranslateService,
+    public theme: ThemeService,
+    private injector: Injector
   ) { }
+
 
   public ngAfterViewInit(): void {
     this.cdr.detectChanges();
@@ -47,5 +89,31 @@ export class AppLayoutComponent implements OnInit, AfterViewInit {
 
   public ngOnInit(): void {
     this.title$ = this.layoutService.title$;
+    // Env configs
+    this.version = this.configService.getAll().version || '0.0.0';
+
+    // IMPORTANT: nonNullable so the type is FormControl<boolean>, not boolean | null
+    this.themeControl = new FormControl<boolean>(this.theme.isDark(), { nonNullable: true });
+    this.langControl = new FormControl<string>(this.translate.getCurrentLang(), { nonNullable: true });
+
+    // 1) UI -> Service: when user toggles the control, call toggleTheme if different
+    this.themeControl.valueChanges.subscribe((wantDark) => {
+      const current = this.theme.isDark();
+      if (wantDark !== current) this.theme.toggleTheme();
+    });
+
+    // 2) Service -> UI: keep control in sync if something else toggles the theme
+    effect(() => {
+      const isDark = this.theme.isDark();
+      // avoid feedback loop
+      if (this.themeControl.value !== isDark) {
+        this.themeControl.setValue(isDark, { emitEvent: false });
+      }
+    }, { injector: this.injector });
+
+    // Language control (optional)
+    this.langControl.valueChanges.subscribe((lang) => {
+      if (lang) this.translate.use(lang);
+    });
   }
 }

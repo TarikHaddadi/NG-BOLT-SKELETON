@@ -39,7 +39,7 @@
       "notify": "Receive alerts and notifications",
       "role": "User role in the app",
       "volume": "Adjust between 0 and 100",
-      "dob": "Format: DD/MM/YYYY",
+      "dob": "Format: YYYY-MM-DD",
       "tags": "Separate with commas",
       "country": "Your current country of residence",
       "phone": "Include country code"

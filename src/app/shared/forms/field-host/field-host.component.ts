@@ -2,8 +2,9 @@ import { Component, Input, OnChanges, Type, computed, signal } from '@angular/co
 import { CommonModule } from '@angular/common';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 
+import { TextFieldComponent } from '../fields/text-field/text-field.component';
 import { TextInputComponent } from '../fields/text-input/text-input.component';
-import { DatePickerComponent } from '../fields/date-picker/datepicker.component';
+import { DatepickerComponent } from '../fields/date-picker/datepicker.component';
 import { ChipsComponent } from '../fields/chips/chips.component';
 import { AutocompleteComponent } from '../fields/autocomplete/autocomplete.component';
 import { ToggleComponent } from '../fields/toggle/toggle.component';
@@ -17,16 +18,17 @@ export interface FieldComponent {
 }
 
 const MAP: Partial<Record<FieldType, Type<FieldComponent>>> = {
+  textarea: TextFieldComponent,
   text: TextInputComponent,
   email: TextInputComponent,
   phone: TextInputComponent,
   password: TextInputComponent,
-  datepicker: DatePickerComponent,
+  datepicker: DatepickerComponent,
   chips: ChipsComponent,
   autocomplete: AutocompleteComponent,
   toggle: ToggleComponent,
   dropdown: SelectComponent,
-  range: RangeComponent,
+  range: RangeComponent
 };
 
 @Component({
@@ -34,10 +36,11 @@ const MAP: Partial<Record<FieldType, Type<FieldComponent>>> = {
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule],
   template: `
-    <ng-container *ngIf="component() as cmp">
+    <ng-container *ngIf="component() as cmp" class="container">
       <ng-container *ngComponentOutlet="cmp; inputs: inputs()"></ng-container>
     </ng-container>
-  `
+  `,
+  styleUrls:["./field-host.component.scss"]
 })
 export class FieldHostComponent implements OnChanges {
   @Input({ required: true }) field!: FieldConfig;

@@ -7,11 +7,8 @@ import { ToastService } from '../../core/services/toast.service';
 import { MatDialog } from '@angular/material/dialog';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatIcon } from '@angular/material/icon';
-import { ThemeService } from '../../core/services/theme.service';
 import { MatButtonModule } from '@angular/material/button';
 import { TranslateModule, TranslatePipe, TranslateService } from '@ngx-translate/core';
-import { MatFormField, MatHint, MatLabel } from '@angular/material/form-field';
-import { MatOption, MatSelect } from '@angular/material/select';
 import { MatGridListModule } from '@angular/material/grid-list';
 import { firstValueFrom, Observable } from 'rxjs';
 import { Store } from '@ngrx/store';
@@ -24,12 +21,10 @@ import { TeamMember } from '../../store/features/team-management/team-management
 import { MatListModule } from '@angular/material/list';
 import { CommonModule } from '@angular/common';
 import { LayoutService } from '../../core/services/layout.service';
-import { ConfigService } from '../../core/services/config.service';
-
 
 @Component({
   selector: 'app-dashboard',
-  imports: [SeoComponent, DynamicFormComponent, MatTooltip, MatIcon, MatButtonModule, TranslatePipe, MatHint, MatOption, MatSelect, MatLabel, MatFormField, TranslateModule, MatGridListModule, MatListModule, CommonModule],
+  imports: [SeoComponent, DynamicFormComponent, MatTooltip, MatIcon, MatButtonModule, TranslatePipe, TranslateModule, MatGridListModule, MatListModule, CommonModule],
   standalone: true,
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.scss',
@@ -42,11 +37,9 @@ export class DashboardComponent implements OnInit {
     private fieldsConfigService: FieldConfigService,
     private toast: ToastService,
     private dialog: MatDialog,
-    public theme: ThemeService,
     public translate: TranslateService,
     private store: Store,
     private layoutService: LayoutService,
-    private configService: ConfigService
   ) {
 
   }
@@ -68,9 +61,6 @@ export class DashboardComponent implements OnInit {
 
 
   public ngOnInit(): void {
-    // Env configs
-    this.version = this.configService.getAll().version || '0.0.0';
-
     /* Form management */
     this.form = this.fb.group({});
     this.fieldConfig = [
@@ -83,7 +73,8 @@ export class DashboardComponent implements OnInit {
       this.fieldsConfigService.getDatepickerField("form.labels.dob"),
       this.fieldsConfigService.getChipsField("form.labels.tags"),
       this.fieldsConfigService.getAutocompleteField("form.labels.country"),
-      this.fieldsConfigService.getRangeField("form.labels.price", 0, 200, 1),
+      this.fieldsConfigService.getRangeField("form.labels.price", 0, 200, 5),
+      this.fieldsConfigService.getTextAreaField("form.labels.input","form.placeholders.input"),
     ];
 
     // NGRX
@@ -140,10 +131,6 @@ export class DashboardComponent implements OnInit {
     this.form.reset();
     this.store.dispatch(clearTeamForm());
     this.selectedMemberId = null;
-  }
-
-  public changeLang(lang: string) {
-    this.translate.use(lang);
   }
 
   public async removeMember(member: TeamMember): Promise<void> {

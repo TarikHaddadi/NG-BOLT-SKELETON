@@ -25,10 +25,18 @@ mat-sidenav {
 
 .side-nav {
     width: 240px;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
 
     &.mat-drawer-closed {
         width: 72px !important;
     }
+}
+
+.menu-list {
+    flex: 1;
+    overflow-y: auto;
 }
 
 .menu-link {
@@ -69,4 +77,30 @@ mat-sidenav {
         background-color: rgba(0, 0, 0, 0.1); // Persisted effect
         font-weight: bold;
     }
+}
+
+.version-wrapper {
+    padding: 8px 16px;
+    text-align: center;
+    font-size: 12px;
+    opacity: 0.6;
+}
+
+.version {
+    font-weight: 500;
+}
+
+
+::ng-deep {
+    .mat-drawer-inner-container {
+        display: flex;
+        flex-direction: column;
+    }
+}
+
+.switchers {
+    display: grid;
+    gap: 2rem;
+    padding: .75rem;
+    margin-top: auto;
 }

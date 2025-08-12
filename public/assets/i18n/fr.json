@@ -18,7 +18,9 @@
       "country": "Pays",
       "phone": "Téléphone",
       "fullname":"Nom complet",
-      "price":"Prix"
+      "price":"Prix",
+      "themeSwitcher":"Mode Sombre",
+      "language":"Langue"
     },
     "placeholders": {
       "input": "Entrez du texte",
@@ -41,16 +43,12 @@
       "notify": "Recevoir des alertes et notifications",
       "role": "Rôle dans l'application",
       "volume": "Ajustez entre 0 et 100",
-      "dob": "Format: JJ/MM/AAAA",
+      "dob": "Format: AAAA-MM-JJ",
       "tags": "Séparées par des virgules",
       "country": "Lieu de résidence actuel",
       "phone": "Incluez l'indicatif régional"
     },
     "errors": {
-      "username": {
-        "required": "Le nom d'utilisateur est requis.",
-        "minlength": "Le nom d'utilisateur est trop court."
-      },
       "email": {
         "required": "L'adresse e-mail est requise.",
         "invalid": "Veuillez entrer une adresse e-mail valide."
@@ -64,11 +62,36 @@
         "required": "Le rôle est requis."
       },
       "dob": {
-        "required": "La date de naissance est requise."
+        "required": "Date is required.",
+        "format": "Invalid date format: {{text}}",
+        "parse": "Invalid date: {{text}}",
+        "minDate": "Date must be on or after {{min}}",
+        "maxDate": "Date must be on or before {{max}}",
+        "dateNotAllowed": "This date is not allowed."
+      },
+      "input": {
+        "required": "This field is required.",
+        "minlength": "Minimum length is {{requiredLength}} characters.",
+        "maxlength": "Maximum length is {{requiredLength}} characters.",
+        "pattern": "Invalid format."
       },
       "phone": {
         "required": "Le numéro de téléphone est requis.",
         "invalid": "Veuillez entrer un numéro de téléphone valide."
+      },
+       "country": {
+        "required": "Country is required.",
+        "invalid": "Select a country.",
+        "notAllowed":"selected value is not allowed"
+      },
+      "notify": {
+        "required": "Notify is required.",
+        "invalid": "Toggle On Notifications."
+      },
+      "tags": {
+        "required": "Tags is required.",
+        "invalid": "Select a tag.",
+        "minOne":"Please select at least oen"
       }
     }
   }

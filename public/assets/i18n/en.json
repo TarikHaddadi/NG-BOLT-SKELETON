@@ -4,7 +4,7 @@
   "LANG": "Language",
   "LANG_HINT": "Used Language",
   "DASHBOARD_TITLE": "Dashboard",
-  "TEAM_MEMBERS":"Team members",
+  "TEAM_MEMBERS": "Team members",
   "form": {
     "labels": {
       "input": "Text",
@@ -17,8 +17,11 @@
       "tags": "Tags",
       "country": "Country",
       "phone": "Phone",
-      "fullname":"Full name",
-      "price":"price"
+      "fullname": "Full name",
+      "price": "price",
+      "themeSwitcher": "Theme",
+      "language": "Language",
+      "textarea": "Textarea"
     },
     "placeholders": {
       "input": "Enter text",
@@ -31,8 +34,9 @@
       "tags": "Add tags",
       "country": "Select a country",
       "phone": "Enter your phone number",
-      "fullname":"Enter the fullname",
-      "price":"Enter the price"
+      "fullname": "Enter the fullname",
+      "price": "Enter the price",
+      "textarea": "Write your text…"
     },
     "hints": {
       "input": "Free text",
@@ -40,39 +44,61 @@
       "password": "At least 8 characters, including a number",
       "notify": "Receive alerts and notifications",
       "role": "User role in the app",
-      "volume": "Adjust between 0 and 100",
-      "dob": "Format: DD/MM/YYYY",
+      "volume": "Adjust between 0 and 200",
+      "dob": "Format: YYYY-MM-DD",
       "tags": "Separate with commas",
       "country": "Your current country of residence",
-      "phone": "Include country code"
+      "phone": "Include country code",
+      "textarea": "Max {{max}} characters."
     },
     "errors": {
-      "username": {
-        "required": "Username is required.",
-        "minlength": "Username is too short."
+      "input": {
+        "required": "Field is required.",
+        "minlength": "Minimum {{requiredLength}} characters (you entered {{actualLength}}).",
+        "maxlength": "Maximum {{requiredLength}} characters allowed.",
+        "invalidChars": "Only letters, numbers, _ - . and spaces are allowed (invalid: “{{char}}”)."
       },
       "email": {
         "required": "Email is required.",
-        "invalid": "Enter a valid email address."
+        "invalid": "Enter a valid email address.",
+        "tld": "The domain extension must be at least 2 letters.",
+        "domain": "The email domain must contain a dot (e.g. example.com).",
+        "maxlength": "Email can’t exceed {{requiredLength}} characters."
       },
       "password": {
         "required": "Password is required.",
-        "minlength": "Password is too short.",
-        "pattern": "Password format is invalid."
+        "minlength": "At least {{requiredLength}} characters (you entered {{actualLength}}).",
+        "maxlength": "Password can’t exceed {{requiredLength}} characters.",
+        "uppercase": "Include at least one uppercase letter.",
+        "digit": "Include at least one number.",
+        "special": "Include at least one special character."
       },
       "role": {
         "required": "Role is required."
       },
       "dob": {
-        "required": "Date of birth is required."
+        "required": "Date is required.",
+        "format": "Invalid date format: {{text}}",
+        "pattern": "Invalid date: {{text}}",
+        "parse": "Invalid date: {{text}}",
+        "minDate": "Date must be on or after {{min}}",
+        "maxDate": "Date must be on or before {{max}}",
+        "dateNotAllowed": "This date is not allowed."
       },
       "phone": {
         "required": "Phone number is required.",
-        "invalid": "Enter a valid phone number."
+        "invalid": "Enter a valid phone number (e.g., +35212345678).",
+        "phoneDigitsLen": "Phone must have {{min}}–{{max}} digits (currently {{actual}})."
       },
       "country": {
         "required": "Country is required.",
-        "invalid": "Select a country."
+        "invalid": "Select a country.",
+        "notAllowed": "selected value is not allowed"
+      },
+      "volume": {
+        "required": "Volume is required.",
+        "min": "Minimum is {{min}} (current {{actual}}).",
+        "max": "Maximum is {{max}} (current {{actual}})."
       },
       "notify": {
         "required": "Notify is required.",
@@ -80,7 +106,13 @@
       },
       "tags": {
         "required": "Tags is required.",
-        "invalid": "Select a tag."
+        "invalid": "Select a tag.",
+        "minOne":"Please select at least one"
+      },
+      "textarea": {
+        "minlength": "Add at least {{requiredLength}} characters (you have {{actualLength}}).",
+        "maxlength": "Please keep it under {{requiredLength}} characters (currently {{actualLength}}).",
+        "invalidChars": "Unsupported character: {{char}}"
       }
     }
   }

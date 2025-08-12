@@ -1,17 +1,29 @@
 <mat-sidenav-container class="app-container">
     <mat-sidenav #sidenav mode="side" [(opened)]="isOpen" class="side-nav" [fixedInViewport]="true">
         <div class="nav-title">Navigation</div>
-        <mat-nav-list>
+
+        <mat-nav-list class="menu-list">
             <ng-container *ngFor="let item of menuItems">
                 <mat-list-item disableRipple class="menu-link" [routerLinkActive]="'active'">
                     <a matLine class="menu-anchor" [routerLink]="item.route" [matTooltip]="!isOpen ? item.label : ''"
                         matTooltipPosition="right">
                         <mat-icon>{{ item.icon }}</mat-icon>
-                        <span class="menu-label">{{ item.label }}</span>
+                        <span class="menu-label">{{ item.label | translate }}</span>
                     </a>
                 </mat-list-item>
             </ng-container>
         </mat-nav-list>
+        <div class="switchers">
+            <!-- Theme switcher using ToggleComponent -->
+            <app-toggle [field]="themeField" [control]="themeControl"></app-toggle>
+
+            <!-- Language switcher using SelectComponent -->
+            <app-select [field]="langField" [control]="langControl"></app-select>
+        </div>
+
+        <div class="version-wrapper">
+            <small class="version">v{{ version }}</small>
+        </div>
     </mat-sidenav>
 
     <mat-sidenav-content>

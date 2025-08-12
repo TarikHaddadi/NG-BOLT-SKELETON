@@ -39,7 +39,7 @@
       "notify": "Recevoir des alertes et notifications",
       "role": "Rôle dans l'application",
       "volume": "Ajustez entre 0 et 100",
-      "dob": "Format: JJ/MM/AAAA",
+      "dob": "Format: AAAA-MM-JJ",
       "tags": "Séparées par des virgules",
       "country": "Lieu de résidence actuel",
       "phone": "Incluez l'indicatif régional"
