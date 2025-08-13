@@ -1,8 +1,9 @@
-2# Security Posture & Migration Plan – SPA → BFF
+# Security Posture & Migration Plan – SPA → BFF
+>_Last updated: 2025-08-13_
+
 **Stack:** Angular 19 SPA + Keycloak (Broker, PKCE) + NgRx + Nginx (Docker)  
 **Decision:** Keep the SPA for UI, **implement a BFF (Backend‑for‑Frontend)** to hold tokens server‑side.
 
----
 
 ## 1) Current State (As‑Is)
 

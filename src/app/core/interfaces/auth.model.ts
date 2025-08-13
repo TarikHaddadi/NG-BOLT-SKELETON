@@ -1,4 +1,4 @@
-import { AuthProfile } from "../../../core/auth/keycloack.types";
+import { AuthProfile } from "./keycloack.model";
 
 
 export interface AuthState {

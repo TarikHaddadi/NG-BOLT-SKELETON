@@ -1,11 +1,13 @@
 import { ActionReducerMap } from '@ngrx/store';
-import { UserState } from './features/user/user.model';
 import { userReducer } from './features/user/user.reducer';
+import { authReducer } from './features/auth/auth.reducer';
+import { teamManagementReducer } from './features/team-management/team-management.reducer';
+import { AppState } from '@core/interfaces';
+// Fulfill imports with new added items
 
-export interface AppState {
-  user: UserState;
-}
-
-export const reducers: ActionReducerMap<AppState> = {
-  user: userReducer
+// Fulfill MAP with new added items
+export const AppReducers: ActionReducerMap<AppState> = {
+  user: userReducer,
+  teamManagement: teamManagementReducer,
+  auth: authReducer
 };

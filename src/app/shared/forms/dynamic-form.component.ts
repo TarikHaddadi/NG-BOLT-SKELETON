@@ -2,10 +2,9 @@ import { Component, Input, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
-
-import { FieldConfig } from './field-config.model';
+import { FieldConfig } from '@core/interfaces';
+import { buildValidators } from '@core/utils';
 import { FieldHostComponent } from './field-host/field-host.component';
-import { buildValidators } from './utils';
 
 type SelValue = string | number;
 

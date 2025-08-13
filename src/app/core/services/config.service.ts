@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import pkg from '../../../../package.json';
-import { AuthRuntimeConfig } from '../auth/keycloack.types';
+import { AuthRuntimeConfig } from '@core/interfaces';
 
 export interface AppConfig {
     name: string;

@@ -5,8 +5,8 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatAutocompleteModule, MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
-import { FieldConfig } from '../../field-config.model';
 import { Observable, map, startWith } from 'rxjs';
+import { FieldConfig } from '@core/interfaces';
 
 @Component({
   selector: 'app-autocomplete',

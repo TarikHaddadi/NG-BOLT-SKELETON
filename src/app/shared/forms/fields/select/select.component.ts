@@ -4,7 +4,7 @@ import { FormControl, ReactiveFormsModule, ValidationErrors } from '@angular/for
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
-import { FieldConfig } from '../../field-config.model';
+import { FieldConfig } from '@core/interfaces';
 
 type SelValue = string | number;
 type SelCtrl = FormControl<SelValue | SelValue[] | null>;

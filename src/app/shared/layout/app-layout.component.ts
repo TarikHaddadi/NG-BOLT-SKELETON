@@ -1,4 +1,3 @@
-// src/app/layout/app-layout.component.ts
 import { AfterViewInit, ChangeDetectorRef, Component, effect, Injector, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatSidenavModule } from '@angular/material/sidenav';
@@ -8,21 +7,16 @@ import { MatButtonModule } from '@angular/material/button';
 import { RouterModule, RouterOutlet } from '@angular/router';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatListModule } from '@angular/material/list';
-import { LayoutService } from '../../core/services/layout.service';
 import { map, Observable } from 'rxjs';
-import { ConfigService } from '../../core/services/config.service';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
-import { ThemeService } from '../../core/services/theme.service';
-import { FieldConfig } from '../forms/field-config.model';
 import { FormControl } from '@angular/forms';
-import { SelectComponent } from '../forms/fields/select/select.component';
-import { ToggleComponent } from '../forms/fields/toggle/toggle.component';
-import { AuthProfile } from '../../core/auth/keycloack.types';
 import { Store } from '@ngrx/store';
-import { logout } from '../../store/features/auth/auth.actions';
-import { selectProfile } from '../../store/features/auth/auth.selectors';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatMenuModule } from '@angular/material/menu';
+import { AppActions, AppSelectors} from '@core';
+import { SelectComponent,ToggleComponent } from '@shared';
+import { AuthProfile, FieldConfig } from '@core/interfaces';
+import { ConfigService, LayoutService, ThemeService } from '@core/services';
 
 @Component({
   selector: 'app-layout',
@@ -130,7 +124,7 @@ export class AppLayoutComponent implements OnInit, AfterViewInit {
     });
 
     // User informations
-    this.profile$ = this.store.select(selectProfile);
+    this.profile$ = this.store.select(AppSelectors.AuthSelectors.selectProfile);
     this.roles$ = this.profile$.pipe(map(p => p?.authorization ?? []))
   }
 
@@ -140,6 +134,6 @@ export class AppLayoutComponent implements OnInit, AfterViewInit {
   }
 
   logout(): void {
-    this.store.dispatch(logout());
+    this.store.dispatch(AppActions.AuthActions.logout());
   }
 }

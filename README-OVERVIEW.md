@@ -20,7 +20,7 @@ Workload (est.): **S ≤1d**, **M 2–3d**, **L 4–7d**, **XL >1wk**
 | Auth | HTTP Interceptor (Bearer) | ✅ | P1 | S | Reads live token from `keycloak().token`. | `auth/auth.interceptor.ts` | — | FE |
 | Auth | Route Guard | ✅ | P1 | S | Functional guard triggers full login redirect. | `auth/auth.guard.ts`, `app.routes.ts` | — | FE |
 | Auth | User Menu + Logout | ✅ | P3 | S | Sidenav shows user info & logout. | Layout component & template | — | FE |
-| Forms | Dynamic Forms system | ✅ | P2 | L | `FieldConfigService`, `DynamicFormComponent`, `FieldHostComponent`. | `shared/forms/**` (Barrels system) | — | FE |
+| Forms | Dynamic Forms system | ✅🟡 | P2 | L | `FieldConfigService`, `DynamicFormComponent`, `FieldHostComponent`,`field-config.service.ts`. | `shared/forms/**` (Barrels system) | Need to customize the inputs of different field generator  | FE |
 | Forms | Validators (custom + built-in) | ✅ | P2 | M | Email TLD, password strength, phone digits, etc. | `shared/forms/utils.ts` | — | FE |
 | i18n | `@ngx-translate` setup | ✅ | P2 | S | Translation files under `/assets/i18n`. | `public/assets/i18n/**`, module config | Keep keys in sync | FE |
 | UI | Theme & Language switchers | ✅ | P3 | S | Uses main components in `shared/forms/fields`. | `app/shared/*` | — | FE |
@@ -37,7 +37,7 @@ Workload (est.): **S ≤1d**, **M 2–3d**, **L 4–7d**, **XL >1wk**
 | Headers | Security headers (HSTS, COOP, CORP, XFO) | 🟡 | P1 | S | Some present; finalize full set. | Nginx conf | Add/verify all headers | SEC/DEVOPS |
 | CORS | API CORS locked to SPA origin | 🟡 | P1 | S | Should allow only SPA origin. | API gateway/config | Review and restrict origins | API/SEC |
 | CI/CD | CSP smoke test | 🟡 | P2 | S | Snippet provided; add as a job. | Pipelines | Implement & gate builds | DEVOPS |
-| Core | Barrels | ❌ | P1 | M | Expose all the components, utils, as Barrels. | `src//**` (Barrels) | Some components are ok, but many of them are not correctly such as NGRX, FOrm components imported and some are not existing yet such as Services, utils, etc... | FE |
+| Core | Barrels | ✅ | P1 | M | Expose all the components, utils, as Barrels. | `src//**` (Barrels), fixed paths and linter | --- | FE |
 | Core | Features & Menus per-tenant via config | ❌ | P1 | M | Feature flags + menu rendering per tenant/role. | `public/assets/config.*.json`, `ConfigService`, `FeatureService` | Implement FeatureService, guards, menu binding | FE |
 | Core | Single-tenant & Multi-tenant support | ❌ | P1 | M | Tenant claim + allow-list per feature. | `public/assets/config.*.json`, `ConfigService` | Add Keycloak tenant claim; config overlays | FE |
 | Core | Cloud & On-Prem compatibility | ❌ | P2 | M | Bundle external assets for offline/no-internet installs. | `public/assets/**` | Remove external URLs; vendor fonts/libs | FE |

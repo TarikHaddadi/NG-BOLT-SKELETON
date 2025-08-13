@@ -24,7 +24,7 @@ This repository provides a scalable, production-ready **Angular 19** setup using
 - 🌐 **Runtime environment configuration** via `public/assets/config.json`
 - 🔐 **Authentication with Keycloak (Broker, PKCE, iframe‑free)**
 - 🔒 **Strict Content Security Policy (CSP)** compatible with Keycloak (no iframes)
-- 🔄 **NgRx** for reactive global state (Store + Effects)
+- 🔄 **NgRx** for reactive global state (Store + Effects + Actions + Selectors + Models)
 - 🧩 **Dynamic Forms** via reusable `FieldConfig` pattern
 - 🌍 **Internationalization** with `@ngx-translate`
 - 🎨 **Angular Material + CDK** UI framework
@@ -138,7 +138,8 @@ Legend: **✅ Done** · **🟡 Ongoing** · **❌ To do**
 - [[✅] - Authentication and state management](./README-AUTH-NGRX.md)
 - [[✅] - Theming, Assets and translattions](./README-ASSETS-TRANSLATIONS.md)
 - [[🟡] - CI/CD](./README-CI-CD.md)
-- [[🟡] - Contribution Guide](./CONTRIBUTING.md)
+- [[✅] - Contribution Guide](./CONTRIBUTING.md)
+- [[🟡] - Contribution Guide V2 with RC, NEXT, LATEST](./CONTRIBUTING-v2.md)
 - [[🟡] - Content Security Policw CSP](./README-CSP.md)
 - [[✅] - Custom Form Builder and custom fields](src/app/shared/README-FORMS.md)
 - [[✅] - Authentication Flow](src/app/core/README-CURRENT-AUTH.md)

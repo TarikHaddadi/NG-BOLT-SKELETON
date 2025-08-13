@@ -1,5 +1,5 @@
 import { createFeatureSelector, createSelector } from '@ngrx/store';
-import { TeamManagementState } from './team-management.model';
+import { TeamManagementState } from '../../../core/interfaces/team-management.model';
 
 // 1. Root selector
 export const selectTeamState = createFeatureSelector<TeamManagementState>('teamManagement');

@@ -1,6 +1,6 @@
 import { createReducer, on } from '@ngrx/store';
 import * as TeamActions from './team-management.actions';
-import { TeamManagementState } from './team-management.model';
+import { TeamManagementState } from '../../../core/interfaces/team-management.model';
 
 const initialState: TeamManagementState = {
     members: [],

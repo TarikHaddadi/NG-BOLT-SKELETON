@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
 import { HttpService } from './http.service';
 import { Observable } from 'rxjs';
-import { CreateUserDto, UpdateUserDto, User } from '../../store/features/user/user.model';
 import { ConfigService } from './config.service';
+import { CreateUserDto, UpdateUserDto, User } from '@core/interfaces';
 
 
 @Injectable({ providedIn: 'root' })

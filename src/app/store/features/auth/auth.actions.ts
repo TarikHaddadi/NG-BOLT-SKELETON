@@ -1,5 +1,5 @@
 import { createAction, props } from '@ngrx/store';
-import { AuthProfile } from '../../../core/auth/keycloack.types';
+import { AuthProfile } from '../../../core/interfaces/keycloack.model';
 
 export const hydrateFromKc = createAction('[Auth] Hydrate From Keycloak');
 
