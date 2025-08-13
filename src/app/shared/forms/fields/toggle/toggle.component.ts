@@ -4,7 +4,7 @@ import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatIconModule } from '@angular/material/icon';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
-import { FieldConfig } from '../../field-config.model';
+import { FieldConfig } from '@core/interfaces';
 
 @Component({
   selector: 'app-toggle',

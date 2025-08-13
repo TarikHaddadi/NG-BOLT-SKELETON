@@ -4,7 +4,7 @@ import { CommonModule } from '@angular/common';
 import { FormControl, ReactiveFormsModule, ValidationErrors } from '@angular/forms';
 import { MatChipListbox, MatChipsModule } from '@angular/material/chips';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
-import { FieldConfig } from '../../field-config.model';
+import { FieldConfig } from '@core/interfaces';
 
 @Component({
   selector: 'app-chips',

@@ -1,19 +1,16 @@
 import { Component, OnInit } from '@angular/core';
 import { MatIcon } from '@angular/material/icon';
-import { TeamMember } from '../../store/features/team-management/team-management.model';
 import { firstValueFrom, Observable } from 'rxjs';
 import { MatDialog } from '@angular/material/dialog';
-import { ConfirmDialogComponent } from '../../shared/dialog/dialog.component';
-import { ToastService } from '../../core/services/toast.service';
 import { Store } from '@ngrx/store';
-import { removeTeamMember } from '../../store/features/team-management/team-management.actions';
 import { TranslateModule } from '@ngx-translate/core';
 import { MatListModule } from '@angular/material/list';
 import { CommonModule } from '@angular/common';
-import { selectTeamLoading, selectTeamMembers } from '../../store/features/team-management/team-management.selectors';
 import { MatButtonModule } from '@angular/material/button';
-import { SeoComponent } from '../../shared/shared';
-import { LayoutService } from '../../core/services/layout.service';
+import { ConfirmDialogComponent, SeoComponent } from '@shared';
+import { AppActions, AppSelectors } from '@core';
+import { LayoutService, ToastService } from '@core/services';
+import { TeamMember } from '@core/interfaces';
 
 @Component({
   selector: 'app-teams',
@@ -33,8 +30,8 @@ export class TeamsComponent implements OnInit {
   ) { }
 
   public ngOnInit(): void {
-    this.members$ = this.store.select(selectTeamMembers);
-    this.loading$ = this.store.select(selectTeamLoading);
+    this.members$ = this.store.select(AppSelectors.TeamSelectors.selectTeamMembers);
+    this.loading$ = this.store.select(AppSelectors.TeamSelectors.selectTeamLoading);
   }
 
   public onTitleChange(title: string): void {
@@ -54,6 +51,6 @@ export class TeamsComponent implements OnInit {
       return;
     }
 
-    this.store.dispatch(removeTeamMember({ member }));
+    this.store.dispatch(AppActions.TeamActions.removeTeamMember({ member }));
   }
 }

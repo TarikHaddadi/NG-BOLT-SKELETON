@@ -6,8 +6,8 @@ import { MatInputModule } from '@angular/material/input';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatIconModule } from '@angular/material/icon';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
-import { FieldConfig } from '../../field-config.model';
 import { DateAdapter, MAT_DATE_FORMATS, MatDateFormats } from '@angular/material/core';
+import { FieldConfig } from '@core/interfaces';
 
 @Component({
   selector: 'app-datepicker',

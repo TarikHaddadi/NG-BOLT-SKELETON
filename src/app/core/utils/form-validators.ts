@@ -1,5 +1,5 @@
 import { Validators, ValidatorFn, AbstractControl, ValidationErrors } from '@angular/forms';
-import { FieldConfig } from './field-config.model';
+import { FieldConfig } from '@core/interfaces';
 
 const textTypes: FieldConfig['type'][] = ['text', 'email', 'phone', 'password', 'chips', 'autocomplete'];
 

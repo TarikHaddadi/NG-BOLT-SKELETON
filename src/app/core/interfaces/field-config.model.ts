@@ -1,7 +1,13 @@
 
-import { ValidatorFn } from '@angular/forms';
+import { FormControl, ValidatorFn } from '@angular/forms';
 
 export type FieldType = 'text' | 'email' | 'phone' | 'password' | 'toggle' | 'dropdown' | 'range' | 'group' | 'array' | 'datepicker' | 'chips' | 'autocomplete' | 'textarea';
+
+export interface FieldComponent {
+  field: FieldConfig;
+  control: FormControl;
+}
+
 
 export interface FieldConfig {
   type: FieldType;

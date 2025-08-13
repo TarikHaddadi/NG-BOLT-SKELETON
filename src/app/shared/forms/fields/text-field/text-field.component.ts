@@ -4,8 +4,8 @@ import { FormControl, ReactiveFormsModule, ValidationErrors } from '@angular/for
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { TextFieldModule } from '@angular/cdk/text-field';
-import { FieldConfig } from '../../field-config.model';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { FieldConfig } from '@core/interfaces';
 
 @Component({
   standalone: true,

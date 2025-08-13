@@ -1,5 +1,5 @@
 import { createAction, props } from "@ngrx/store";
-import { TeamMember } from "./team-management.model";
+import { TeamMember } from "../../../core/interfaces/team-management.model";
 
 
 export const saveTeamForm = createAction(

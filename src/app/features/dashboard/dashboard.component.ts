@@ -1,9 +1,5 @@
 import { Component, Input, OnInit, ViewEncapsulation } from '@angular/core';
-import { ConfirmDialogComponent, DynamicFormComponent, SeoComponent } from '../../shared/shared';
-import { FieldConfig } from '../../shared/forms/field-config.model';
 import { FormBuilder, FormGroup } from '@angular/forms';
-import { FieldConfigService } from '../../core/services/field-config.service';
-import { ToastService } from '../../core/services/toast.service';
 import { MatDialog } from '@angular/material/dialog';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatIcon } from '@angular/material/icon';
@@ -12,15 +8,12 @@ import { TranslateModule, TranslatePipe, TranslateService } from '@ngx-translate
 import { MatGridListModule } from '@angular/material/grid-list';
 import { firstValueFrom, Observable } from 'rxjs';
 import { Store } from '@ngrx/store';
-import { selectUser, selectUserLoading } from '../../store/features/user/user.selectors';
-import { loadUser } from '../../store/features/user/user.actions';
-import { User } from '../../store/features/user/user.model';
-import { clearTeamForm, removeTeamMember, saveTeamForm, updateTeamForm } from '../../store/features/team-management/team-management.actions';
-import { selectTeamLoading, selectTeamMembers } from '../../store/features/team-management/team-management.selectors';
-import { TeamMember } from '../../store/features/team-management/team-management.model';
 import { MatListModule } from '@angular/material/list';
 import { CommonModule } from '@angular/common';
-import { LayoutService } from '../../core/services/layout.service';
+import { AppActions, AppSelectors} from '@core';
+import { ConfirmDialogComponent, DynamicFormComponent, SeoComponent } from '@shared';
+import { FieldConfigService, LayoutService, ToastService } from '@core/services';
+import { FieldConfig, TeamMember, User } from '@core/interfaces';
 
 @Component({
   selector: 'app-dashboard',
@@ -78,13 +71,13 @@ export class DashboardComponent implements OnInit {
     ];
 
     // NGRX
-    this.user$ = this.store.select(selectUser);
-    this.userloading$ = this.store.select(selectUserLoading);
-    this.store.dispatch(loadUser());
+    this.user$ = this.store.select(AppSelectors.UserSelectors.selectUser);
+    this.userloading$ = this.store.select(AppSelectors.UserSelectors.selectUserLoading);
+    this.store.dispatch(AppActions.UserActions.loadUser());
 
     // NGRX
-    this.members$ = this.store.select(selectTeamMembers);
-    this.teamloading$ = this.store.select(selectTeamLoading);
+    this.members$ = this.store.select(AppSelectors.TeamSelectors.selectTeamMembers);
+    this.teamloading$ = this.store.select(AppSelectors.TeamSelectors.selectTeamLoading);
   }
 
   public onTitleChange(title: string): void {
@@ -124,12 +117,12 @@ export class DashboardComponent implements OnInit {
 
     // check if we adding a new element of just updating
     if (this.selectedMemberId) {
-      this.store.dispatch(updateTeamForm({ member }));
+      this.store.dispatch(AppActions.TeamActions.updateTeamForm({ member }));
     } else {
-      this.store.dispatch(saveTeamForm({ member }));
+      this.store.dispatch(AppActions.TeamActions.saveTeamForm({ member }));
     }
     this.form.reset();
-    this.store.dispatch(clearTeamForm());
+    this.store.dispatch(AppActions.TeamActions.clearTeamForm());
     this.selectedMemberId = null;
   }
 
@@ -146,7 +139,7 @@ export class DashboardComponent implements OnInit {
       return;
     }
 
-    this.store.dispatch(removeTeamMember({ member }));
+    this.store.dispatch(AppActions.TeamActions.removeTeamMember({ member }));
   }
 
   public editMember(member: TeamMember) {

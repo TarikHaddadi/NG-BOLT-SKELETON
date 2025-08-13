@@ -3,7 +3,7 @@ import { RouterOutlet } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import { loadTheme } from '../main';
 import { Store } from '@ngrx/store';
-import { hydrateFromKc } from './store/features/auth/auth.actions';
+import { AppActions } from '@core';
 
 @Component({
   selector: 'app-root',
@@ -26,6 +26,6 @@ export class AppComponent {
     this.translate.use('en');
     loadTheme("light");
 
-    this.store.dispatch(hydrateFromKc());
+    this.store.dispatch(AppActions.AuthActions.hydrateFromKc());
   }
 }

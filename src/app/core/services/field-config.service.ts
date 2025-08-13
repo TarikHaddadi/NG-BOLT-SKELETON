@@ -1,6 +1,8 @@
 import { Injectable } from '@angular/core';
 import { Validators } from '@angular/forms';
-import { allowedCharsValidator, datePatternFromPlaceholder, emailTldValidator, FieldConfig, minArrayLength, optionInListValidator, passwordStrengthValidator, phoneDigitCount } from '../../shared/shared';
+import { FieldConfig } from '@core/interfaces';
+import { allowedCharsValidator, datePatternFromPlaceholder, emailTldValidator, minArrayLength, optionInListValidator, passwordStrengthValidator, phoneDigitCount } from '@core/utils';
+
 
 @Injectable({ providedIn: 'root' })
 export class FieldConfigService {
