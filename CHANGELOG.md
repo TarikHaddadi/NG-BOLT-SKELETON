@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.1.1](https://dev.azure.com/cadai/Socle/_git/FrontEnd/compare/v1.1.0...v1.1.1) (2025-09-02)
+
+
+### Bug Fixes
+
+* **appConfig:** passing environments from hsot app to core ([1506931](https://dev.azure.com/cadai/Socle/_git/FrontEnd/commit/1506931e97c295dbd108d0f0fe437bd64a45f58a))
+* **core:** app changes implementation to angular 19 + updating module + udpating configs ([a3f2159](https://dev.azure.com/cadai/Socle/_git/FrontEnd/commit/a3f215926329313f7f625d6117bd4e11a79e4fdd))
+
 ## [1.1.0](https://dev.azure.com/cadai/Socle/_git/FrontEnd/compare/v1.0.8...v1.1.0) (2025-08-13)
 
 ### [1.0.8](https://dev.azure.com/cadai/Socle/_git/FrontEnd/compare/v1.0.7...v1.0.8) (2025-08-13)
