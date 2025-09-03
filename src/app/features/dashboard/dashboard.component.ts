@@ -4,7 +4,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatIcon } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
-import { TranslateModule, TranslatePipe, TranslateService } from '@ngx-translate/core';
+import { TranslateModule, TranslatePipe } from '@ngx-translate/core';
 import { MatGridListModule } from '@angular/material/grid-list';
 import { firstValueFrom, Observable } from 'rxjs';
 import { Store } from '@ngrx/store';
@@ -30,10 +30,9 @@ export class DashboardComponent implements OnInit {
     private fieldsConfigService: FieldConfigService,
     private toast: ToastService,
     private dialog: MatDialog,
-    public translate: TranslateService,
     private store: Store,
     private layoutService: LayoutService,
-  ) {}
+  ) { }
 
   public selectedMemberId: number | null = null;
   @Input() name!: string;

@@ -1,23 +1,10 @@
 /// <reference types="@angular/localize" />
 
 import { bootstrapApplication } from '@angular/platform-browser';
-import { provideAppInitializer } from '@angular/core';
 import { AppComponent } from './app/app.component';
 import { appConfig } from './app/app.config';
 import { provideCore } from '@cadai/pxs-ng-core/core';
 import pkg from '../package.json';
-
-/** Simple theme loader (sync) */
-export function loadTheme(theme: 'light' | 'dark') {
-  const href = `assets/theme/${theme}.css`;
-  const existing = document.getElementById('theme-style') as HTMLLinkElement | null;
-  if (existing) { existing.href = href; return; }
-  const link = document.createElement('link');
-  link.id = 'theme-style';
-  link.rel = 'stylesheet';
-  link.href = href;
-  document.head.appendChild(link);
-}
 
 (async () => {
   // Load runtime env before bootstrapping
@@ -27,7 +14,7 @@ export function loadTheme(theme: 'light' | 'dark') {
 
   await bootstrapApplication(AppComponent, {
     providers: [
-      ...appConfig.providers!,                // router, animations, store
+      ...appConfig.providers!,
       provideCore({
         appVersion: pkg.version,
         environments: env,
@@ -35,11 +22,8 @@ export function loadTheme(theme: 'light' | 'dark') {
         i18n: {
           prefix: 'assets/i18n/',
           suffix: '.json',
-          fallbackLang: 'en',
-          lang: 'en',
         },
       }),
-      provideAppInitializer(() => loadTheme('light')),
     ],
   });
 })().catch(err => console.error('Bootstrap failed:', err));

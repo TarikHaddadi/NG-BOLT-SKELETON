@@ -12,13 +12,11 @@
       "pkceMethod": "S256"
     }
   },
+
+  
   "realtime": {
     "enabled": false,
-    "order": [
-      "sse",
-      "websocket",
-      "push"
-    ],
+    "order": ["sse", "websocket", "push"],
     "transports": {
       "sse": {
         "enabled": false,
@@ -31,14 +29,12 @@
       "push": {
         "enabled": false,
         "vapidPublicKey": "BPuB1c…publicKey…",
-        "topics": [
-          "alerts",
-          "jobs"
-        ],
+        "topics": ["alerts", "jobs"],
         "requireUserOptIn": true
       }
     }
   },
+
   "features": {
     "dashboard": {
       "enabled": true,
@@ -73,10 +69,19 @@
     },
     "ai.chat": {
       "enabled": true,
-      "variants": {
-        "ai.provider": "openai",
-        "ai.model": "gpt-4o-mini"
-      },
+        "variants": [{
+          "ai.provider": "openai",
+          "ai.model": ["gpt-4o-mini"]
+        },
+        {
+          "ai.provider": "azure",
+          "ai.model": ["az-4o", "az8-4o", "az-4o-large"]
+        },
+        {
+          "ai.provider": "deepseek",
+          "ai.model": ["deep-4o-large", "deep-4o", "deep-4o5-large"]
+        }
+      ],
       "roles": [
         "ROLE_user",
         "ROLE_admin"
@@ -95,10 +100,19 @@
     },
     "ai.compare": {
       "enabled": true,
-      "variants": {
-        "ai.provider": "openai",
-        "ai.model": "gpt-4o-mini"
-      },
+      "variants": [{
+          "ai.provider": "openai",
+          "ai.model": ["gpt-4o-mini"]
+        },
+        {
+          "ai.provider": "azure",
+          "ai.model": ["az-4o", "az-4o3", "az-4o-large"]
+        },
+        {
+          "ai.provider": "google3",
+          "ai.model": ["google-4o-large", "google-4o", "google-43o-large"]
+        }
+      ],
       "roles": [
         "ROLE_admin",
         "ROLE_user"
@@ -117,10 +131,15 @@
     },
     "ai.workflows": {
       "enabled": true,
-      "variants": {
-        "ai.provider": "openai",
-        "ai.model": "gpt-4o-mini"
-      },
+      "variants": [{
+          "ai.provider": "openai",
+          "ai.model": ["gpt-4o-mini","gpt-4o"]
+        },
+        {
+          "ai.provider": "amazon",
+          "ai.model": ["aws-4o6", "aws-4o", "aws-4o-large"]
+        }
+      ],
       "roles": [
         "ROLE_admin",
         "ROLE_user"
