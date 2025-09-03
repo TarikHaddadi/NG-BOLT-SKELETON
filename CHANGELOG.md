@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.2.0](https://dev.azure.com/cadai/Socle/_git/FrontEnd/compare/v1.1.4...v1.2.0) (2025-09-03)
+
+
+### Features
+
+* **config:** app fully configurable and passes items to core ([879b79f](https://dev.azure.com/cadai/Socle/_git/FrontEnd/commit/879b79fa9186a1246b817492ad9bec7f82008339))
+
+
+### Bug Fixes
+
+* **quickSettings:** fixing quick settings and conenction to NGX Store on the SDk + udpating module ([bc77f91](https://dev.azure.com/cadai/Socle/_git/FrontEnd/commit/bc77f918b8f84123e5525d0230c04ffcfb373c27))
+
 ### [1.1.4](https://dev.azure.com/cadai/Socle/_git/FrontEnd/compare/v1.1.3...v1.1.4) (2025-09-02)
 
 ### [1.1.3](https://dev.azure.com/cadai/Socle/_git/FrontEnd/compare/v1.1.2...v1.1.3) (2025-09-02)
