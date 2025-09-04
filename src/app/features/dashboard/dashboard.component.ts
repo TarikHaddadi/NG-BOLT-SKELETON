@@ -1,5 +1,5 @@
 import { Component, Input, OnInit, ViewEncapsulation } from '@angular/core';
-import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatIcon } from '@angular/material/icon';
@@ -12,6 +12,7 @@ import { MatListModule } from '@angular/material/list';
 import { CommonModule } from '@angular/common';
 import { ConfirmDialogComponent, DynamicFormComponent, SeoComponent } from '@cadai/pxs-ng-core/shared';
 import { FieldConfigService, LayoutService, ToastService } from '@cadai/pxs-ng-core/services';
+import { passwordStrengthValidator } from '@cadai/pxs-ng-core/utils';
 import { FieldConfig, TeamMember, User } from '@cadai/pxs-ng-core/interfaces';
 import { AppActions, AppSelectors } from '@cadai/pxs-ng-core/store';
 import { RouterModule } from '@angular/router';
@@ -51,7 +52,7 @@ export class DashboardComponent implements OnInit {
     private dialog: MatDialog,
     private store: Store,
     private layoutService: LayoutService,
-  ) {}
+  ) { }
 
   public selectedMemberId: number | null = null;
   @Input() name!: string;
@@ -68,22 +69,100 @@ export class DashboardComponent implements OnInit {
   public userloading$!: Observable<boolean>;
   public teamloading$!: Observable<boolean>;
 
-
   public ngOnInit(): void {
     /* Form management */
     this.form = this.fb.group({});
     this.fieldConfig = [
-      this.fieldsConfigService.getTextField('form.labels.fullname', 'form.placeholders.fullname'),
-      this.fieldsConfigService.getEmailField("form.labels.email", "form.placeholders.email"),
-      this.fieldsConfigService.getPasswordField("form.labels.password", "form.placeholders.password"),
-      this.fieldsConfigService.getPhoneField("form.labels.phone", "form.placeholders.phone"),
-      this.fieldsConfigService.getToggleField("form.labels.notify"),
-      this.fieldsConfigService.getDropdownField("form.labels.role"),
-      this.fieldsConfigService.getDatepickerField("form.labels.dob"),
-      this.fieldsConfigService.getChipsField("form.labels.tags"),
-      this.fieldsConfigService.getAutocompleteField("form.labels.country"),
-      this.fieldsConfigService.getRangeField("form.labels.price", 0, 200, 5),
-      this.fieldsConfigService.getTextAreaField("form.labels.input", "form.placeholders.input"),
+      this.fieldsConfigService.getTextField({
+        name: 'fullName',
+        label: 'form.labels.fullname',
+        placeholder: 'form.placeholders.fullname',
+        // swap/extend validation easily:
+        validators: [Validators.required, Validators.minLength(2), Validators.maxLength(80)],
+        errorMessages: { required: 'form.errors.fullname.required' },
+      }),
+
+      this.fieldsConfigService.getEmailField({
+        name: 'email',
+        label: 'form.labels.email',
+        placeholder: 'form.placeholders.email',
+      }),
+
+      this.fieldsConfigService.getPasswordField({
+        name: 'password',
+        label: 'form.labels.password',
+        placeholder: 'form.placeholders.password',
+        // example: enforce special char as well (SDK default allows you to replace)
+        validators: [
+          Validators.required,
+          Validators.maxLength(128),
+          passwordStrengthValidator({ minLength: 8, minUpper: 1, minDigits: 1, minSpecial: 1 }),
+        ],
+        errorMessages: { special: 'form.errors.password.special' },
+      }),
+
+      this.fieldsConfigService.getPhoneField({
+        name: 'phone',
+        label: 'form.labels.phone',
+        placeholder: '+352 12345678',
+        defaultValue: '+352',
+      }),
+
+      this.fieldsConfigService.getToggleField({
+        name: 'notify',
+        label: 'form.labels.notify',
+        helperText: 'form.hints.notify',
+        required: false,
+      }),
+
+      this.fieldsConfigService.getDropdownField({
+        name: 'role',
+        label: 'form.labels.role',
+        placeholder: 'form.placeholders.role',
+        options: [
+          { label: 'Admin', value: 'admin' },
+          { label: 'User', value: 'user' },
+          { label: 'Manager', value: 'manager' },
+        ],
+        multiple: false,
+      }),
+
+      this.fieldsConfigService.getDatepickerField({
+        name: 'dob',
+        label: 'form.labels.dob',
+        placeholder: 'YYYY-MM-DD',
+      }),
+
+      this.fieldsConfigService.getChipsField({
+        name: 'tags',
+        label: 'form.labels.tags',
+        chipOptions: ['Angular', 'React', 'Vue', 'Node.js'],
+        multiple: true,
+      }),
+
+      this.fieldsConfigService.getAutocompleteField({
+        name: 'country',
+        label: 'form.labels.country',
+        autocompleteOptions: ['Luxembourg', 'Germany', 'France', 'Belgium', 'Netherlands'],
+        placeholder: 'form.placeholders.country',
+      }),
+
+      this.fieldsConfigService.getRangeField({
+        name: 'price',
+        label: 'form.labels.price',
+        min: 0,
+        max: 200,
+        step: 5,
+        defaultValue: 20,
+      }),
+
+      this.fieldsConfigService.getTextAreaField({
+        name: 'input',
+        label: 'form.labels.input',
+        placeholder: 'form.placeholders.input',
+        showCounter: true,
+        maxLength: 500,
+      }),
     ];
 
     // NGRX

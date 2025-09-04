@@ -14,7 +14,7 @@ Workload (est.): **S ≤1d**, **M 2–3d**, **L 4–7d**, **XL >1wk**
 |---|---|---:|---|---|---|---|---|---|
 | Core | Decoupled PXS-NG-CORE Angular Core with Best practices  and its own regisry on Azure | ✅ | P1 | XL | App uses standalone components, strict TS/ESLint. Also imports are done via barels `@cadai/pxs-ng-core/*` | `See core repository on Azure actifacts https://dev.azure.com/cadai/Socle/_artifacts/feed/PXS-NG-CORE` | — | FE |
 | Core | Angular 19 + Standalone APIs | ✅ | P2 | L | App uses standalone components, strict TS/ESLint. | `src/app/**`, `tsconfig.json`, `.eslintrc.*` | — | FE |
-| Core | Runtime Config via `config.json` + `ConfigService` | ✅ | P1 | M | Loads `/assets/config.json` at bootstrap. | `public/assets/config.*.json`, `ConfigService` | Ensure env files match Keycloak/API | FE |
+| Core | Runtime Config via `CORE_OPTIONS` + `CoreOptions` | ✅ | P1 | M | Loads `/assets/config.json` at bootstrap. | `public/assets/config.*.json`, `Core.ts` | Ensure env files match Keycloak/API | FE |
 | State | NgRx Store setup | ✅ | P2 | M | Store with feature slices; functional effects enabled. | `src/app/store/**` (Barrels) | — | FE |
 | State | Tokenless `auth` slice | ✅ | P1 | S | Only `name`, `email` (+ optional `isAuthenticated`, `expiresAt`). | `auth.reducer.ts`, `auth.selectors.ts` | Keep tokens out of state | FE |
 | Auth | Keycloak (Broker) – redirect-only PKCE | ✅ | P1 | M | `onLoad: 'login-required'`, `pkceMethod: 'S256'`, no iframes. | `auth/keycloak.service.ts`, `assets/config.json` | Review Keycloak lifetimes/rotation | FE/SEC |
