@@ -5,13 +5,43 @@
   "LANG_HINT": "Langue utilisée",
   "DASHBOARD_TITLE": "Tableau de bord",
   "TEAM_MEMBERS": "Membres de l’équipe",
-  "quick_settings":"Paramètres rapides",
-  "confirm":"Confirmer",
-  "cancel":"Annuler",
+  "quick_settings": "Paramètres rapides",
+  "confirm": "Confirmer",
+  "cancel": "Annuler",
+  "navigationTitle": "Navigation",
+  "selection": "Séléction",
+  "name": "Nom",
+  "role": "Rôle",
+  "created": "Crée a",
+  "delete": "Supprimer",
+  "edit": "Modifier",
+  "back": "Retour",
+  "export": "Exporter",
+  "refresh":"Rafraichir",
+  "table": {
+    "paginator": {
+      "itemsPerPage": "Éléments par page",
+      "nextPage": "Page suivante",
+      "prevPage": "Page précédente",
+      "firstPage": "Première page",
+      "lastPage": "Dernière page",
+      "range": "{{start}}–{{end}} sur {{length}}",
+      "rangeEmpty": "0 sur {{length}}"
+    },
+    "columns": "Colonnes",
+    "filter": "Filtrer",
+    "filter.contains": "Contient",
+    "hint": {
+      "reorder": "Glissez les en-têtes pour réordonner"
+    },
+    "searchPlaceholder": "Rechercher…"
+  },
+  "actions": "Actions",
   "nav": {
     "dashboard": "GenAI Tableau de bord",
     "reports": "GenAI Rapports",
-    "team": "GenAI Équipe",
+    "components": "GenAI Composants",
+    "team": "GenAI Forms",
     "genai-chat": "GenAI Chat",
     "genai-compare": "GenAI Comparer",
     "genai-workflows": "GenAI Flux de travail",
@@ -20,17 +50,17 @@
     "admin": "Admin"
   },
   "ai": {
-    "chat":"Scope du chat",
-    "compare":"Scope de la comparaison",
-    "workflows":"Scope des workflows",
-    "provider":"Fournisseur",
-    "model":"Modèle",
-    "temperature":"température",
-    "max_tokens":"Tokens max",
-    "global":"Scope globale",
-    "scope":"Scope",
-    "variant":"Variante",
-    "value":"Valeur"
+    "chat": "Scope du chat",
+    "compare": "Scope de la comparaison",
+    "workflows": "Scope des workflows",
+    "provider": "Fournisseur",
+    "model": "Modèle",
+    "temperature": "température",
+    "max_tokens": "Tokens max",
+    "global": "Scope globale",
+    "scope": "Scope",
+    "variant": "Variante",
+    "value": "Valeur"
   },
   "error": {
     "403": {

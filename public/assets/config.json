@@ -49,6 +49,19 @@
       "route": "/dashboard",
       "requireAuth": true
     },
+    "components": {
+      "enabled": true,
+      "roles": [
+        "ROLE_user",
+        "ROLE_admin"
+      ],
+
+      "key": "components",
+      "label": "nav.components",
+      "icon": "extension",
+      "route": "/components",
+      "requireAuth": false
+    },
     "team": {
       "enabled": true,
       "roles": [

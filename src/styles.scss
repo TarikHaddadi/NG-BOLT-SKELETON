@@ -1,29 +1,17 @@
 @use '@angular/material' as mat;
+@use './styles/mixins' as *;
 
 @include mat.core();
 
-// Define custom themes
-$light-theme: mat.define-theme((
-  color: (
-    theme-type: light,
-    primary: mat.$azure-palette,
-    tertiary: mat.$blue-palette
-  ),
-  typography: (
-    brand-family: 'Roboto, "Helvetica Neue", sans-serif'
-  )
-));
+$primary-palette: mat.$azure-palette;
+$tertiary-palette: mat.$green-palette;
 
-$dark-theme: mat.define-theme((
-  color: (
-    theme-type: dark,
-    primary: mat.$azure-palette,
-    tertiary: mat.$blue-palette
-  ),
-  typography: (
-    brand-family: 'Roboto, "Helvetica Neue", sans-serif'
-  )
-));
+// M3 theming: only primary + tertiary are allowed here in your version
+$light-theme: mat.define-theme((color: (theme-type: light, primary: $primary-palette, tertiary: $tertiary-palette),
+      typography: (brand-family: 'Roboto, "Helvetica Neue", sans-serif')));
+
+$dark-theme: mat.define-theme((color: (theme-type: dark, primary: $primary-palette, tertiary: $tertiary-palette),
+      typography: (brand-family: 'Roboto, "Helvetica Neue", sans-serif')));
 
 // Apply light theme by default
 :root {
@@ -36,7 +24,8 @@ html.dark {
 }
 
 // Layout tokens
-html, body {
+html,
+body {
   height: 100%;
   margin: 0;
   font-family: Roboto, "Helvetica Neue", sans-serif;
@@ -65,9 +54,27 @@ html, body {
 }
 */
 
-// Darkmore overlay overrides
-.dark .cdk-overlay-backdrop.cdk-overlay-backdrop-showing { background: rgb(189 189 189 / 72%) !important }
-.dark .mat-mdc-dialog-container .mdc-dialog__surface { background: #1f2329; color: #e7e9ee; }
+// Darkmode overlay overrides
+.dark {
+  .cdk-overlay-backdrop.cdk-overlay-backdrop-showing {
+    background: rgb(189 189 189 / 72%) !important
+  }
 
-.light .cdk-overlay-backdrop.cdk-overlay-backdrop-showing { background: rgba(0,0,0,.45) !important; }
-.light .mat-mdc-dialog-container .mdc-dialog__surface { background: #fff; color: #1d1d1f; }
+  .mat-mdc-dialog-container .mdc-dialog__surface {
+    background: #1f2329;
+    color: #e7e9ee;
+  }
+
+  .title {
+    color: var(--mat-table-row-item-label-text-color, #575656); 
+  }
+}
+
+.light .cdk-overlay-backdrop.cdk-overlay-backdrop-showing {
+  background: rgba(0, 0, 0, .45) !important;
+}
+
+.light .mat-mdc-dialog-container .mdc-dialog__surface {
+  background: #fff;
+  color: #1d1d1f;
+}

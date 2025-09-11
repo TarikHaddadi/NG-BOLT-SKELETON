@@ -5,13 +5,43 @@
   "LANG_HINT": "Used Language",
   "DASHBOARD_TITLE": "Dashboard",
   "TEAM_MEMBERS": "Team members",
-  "quick_settings":"Quick settings",
-  "confirm":"Confirm",
-  "cancel":"Cancel",
+  "quick_settings": "Quick settings",
+  "confirm": "Confirm",
+  "cancel": "Cancel",
+  "navigationTitle": "Navigation",
+  "selection": "Selection",
+  "name": "Name",
+  "role": "Role",
+  "created": "Created at",
+  "actions": "Actions",
+  "delete": "Delete",
+  "edit": "Edit",
+  "back": "Back",
+  "export": "Export",
+  "refresh":"Refresh",
+  "table": {
+    "paginator": {
+      "itemsPerPage": "Items per page",
+      "nextPage": "Next page",
+      "prevPage": "Previous page",
+      "firstPage": "First page",
+      "lastPage": "Last page",
+      "range": "{{start}}–{{end}} of {{length}}",
+      "rangeEmpty": "0 of {{length}}"
+    },
+    "columns": "Columns",
+    "filter": "Filter",
+    "filter.contains": "Contains",
+    "hint": {
+      "reorder": "Drag headers to reorder columns"
+    },
+    "searchPlaceholder": "Search…"
+  },
   "nav": {
     "dashboard": "GenAI Dashboard",
-    "reports": "GenAI Dashboard",
+    "reports": "GenAI Reports",
     "team": "GenAI Team",
+    "components": "GenAI Components",
     "genai-chat": "GenAI Chat",
     "genai-compare": "GenAI Compare",
     "genai-workflows": "GenAI Workflows",
@@ -20,17 +50,17 @@
     "admin": "Admin"
   },
   "ai": {
-    "chat":"Chat Scope",
-    "compare":"Compare Scope",
-    "workflows":"Workflows Scope",
-    "provider":"Provider",
-    "model":"Model",
-    "temperature":"Temperature",
-    "max_tokens":"Max tokens",
-    "global":"Global Scope",
-    "scope":"Scope",
-    "variant":"Variant",
-    "value":"Value"
+    "chat": "Chat Scope",
+    "compare": "Compare Scope",
+    "workflows": "Workflows Scope",
+    "provider": "Provider",
+    "model": "Model",
+    "temperature": "Temperature",
+    "max_tokens": "Max tokens",
+    "global": "Global Scope",
+    "scope": "Scope",
+    "variant": "Variant",
+    "value": "Value"
   },
   "error": {
     "403": {
