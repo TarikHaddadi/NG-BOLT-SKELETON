@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.9.0](https://dev.azure.com/cadai/Socle/_git/FrontEnd/compare/v1.5.0...v1.9.0) (2025-09-12)
+
+
+### Features
+
+* **components:** charts, tables, layout, components finalized ([6961312](https://dev.azure.com/cadai/Socle/_git/FrontEnd/commit/6961312b15b8e16a2f6b159839a5e58f89ee185c))
+
 ## [1.8.0](https://dev.azure.com/cadai/Socle/_git/FrontEnd/compare/v1.5.0...v1.8.0) (2025-09-12)
 
 ## [1.7.0](https://dev.azure.com/cadai/Socle/_git/FrontEnd/compare/v1.5.0...v1.7.0) (2025-09-12)
