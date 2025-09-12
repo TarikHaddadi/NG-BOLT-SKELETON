@@ -246,6 +246,8 @@ export const routes: Routes = [
 
 ### 6) Dynamic Menu from Features (optional)
 
+You can list the available features directly from the features services by using the following
+
 ```ts
 // in a layout or menu service/component
 import { inject } from '@angular/core';
@@ -302,10 +304,13 @@ public/assets/i18n/fr.json
 Only config.json is loaded by the app, so CI/CD pipelines copy the correct version based on branch or env.
 
 ## ⚒️ Development build & serve
+
 ```
 npm start                 # = ng serve
 ```
+
 ### Static builds
+
 ```
 npm run build             # = ng build --configuration=development
 npm run buildUat
@@ -348,6 +353,8 @@ Legend: **✅ Done** · **🟡 Ongoing** · **❌ To do**
 - [[✅] - Global Core Overview](./README-OVERVIEW.md)
 - [[✅] - Change log](./CHANGELOG.md)
 - [[✅] - Theming, Assets and translattions](./README-ASSETS-TRANSLATIONS.md)
+- [[✅] - Smart Tables](./README-SMARTABLES.md)
+- [[✅] - Charts](./README-CHARTS.md)
 - [[🟡] - CI/CD](./README-CI-CD.md)
 - [[✅] - Contribution Guide](./CONTRIBUTING.md)
 
