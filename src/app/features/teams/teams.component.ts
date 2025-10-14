@@ -161,12 +161,33 @@ export class TeamsComponent implements OnInit {
         color: "primary",
         layoutClass: "primary",
       }),
+
+      this.fieldsConfigService.getFileField({
+        name: 'file',
+        label: 'form.labels.file',
+        multiple: true,
+        accept: '.pdf,.docx,image/*',
+        maxFiles: 3,
+        maxTotalSize: 1 * 1024 * 1024,  // 1 MB total
+        required: true,
+        validators: [Validators.required],
+      }),
+
+      this.fieldsConfigService.getFileField({
+        name: 'file2',
+        label: 'form.labels.file',
+        multiple: false,
+        accept: '.pdf,.docx,image/*',
+        maxFileSize:  124,
+        required: true,
+        validators: [Validators.required],
+      })
     ];
 
     // NGRX
-/*     this.user$ = this.store.select(AppSelectors.UserSelectors.selectUser);
-    this.userloading$ = this.store.select(AppSelectors.UserSelectors.selectUserLoading);
-    this.store.dispatch(AppActions.UserActions.loadUser()); */
+    /*     this.user$ = this.store.select(AppSelectors.UserSelectors.selectUser);
+        this.userloading$ = this.store.select(AppSelectors.UserSelectors.selectUserLoading);
+        this.store.dispatch(AppActions.UserActions.loadUser()); */
 
     // NGRX
     this.members$ = this.store.select(AppSelectors.TeamSelectors.selectTeamMembers);
@@ -213,7 +234,7 @@ export class TeamsComponent implements OnInit {
     });
   }
 
-  
+
   public async submit(): Promise<void> {
     if (this.form.invalid) {
       this.toast.show('Form is invalid', 'Dismiss');
