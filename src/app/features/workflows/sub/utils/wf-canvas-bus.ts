@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Subject } from 'rxjs';
-import { PipelineWorkflowDTO } from './pipeline-progress.component';
 import { WorkflowNodeDataBaseParams } from '@cadai/pxs-ng-core/interfaces';
+import { PipelineWorkflowDTO } from './workflow.interface';
 
 
 @Injectable({ providedIn: 'root' })
@@ -16,4 +16,6 @@ export class WfCanvasBus {
   stageCancel$ = new Subject<{ index: number; nodeIds: string[] }>();
   pipelineCancel$ = new Subject<void>();
   toggleRunPanel$ = new Subject<{ anchorNodeId?: string }>();
+  nodeFormStatus$ = new Subject<{ nodeId: string; invalid: boolean; invalidFields?: string[] }>();
+  nodeFlagsPatch$ = new Subject<{ nodeId: string; flags: Record<string, unknown> }>();
 }

@@ -1,0 +1,270 @@
+:host {
+    margin: 18px;
+    display: block;
+}
+
+.pipe {
+    --c-muted: #cfd8dc;
+    --c-fg: #263238;
+    --c-bg: #ffffff;
+
+    --c-queued: #90a4ae;
+    --c-running: #1e88e5;
+    --c-ok: #2e7d32;
+    --c-err: #e53935;
+    --c-skip: #9e9e9e;
+
+    --node-radius: 30px;
+    --node-pad-y: 8px;
+    --node-pad-x: 10px;
+    --gap-x: 24px;
+    --gap-y: 10px;
+
+    color: var(--c-fg);
+}
+
+:host-context(.dark) .pipe {
+    --c-bg: #0f1115;
+    --c-fg: #e3eaf1;
+    --c-muted: #33424e;
+    --c-queued: #6c7a86;
+    --c-running: #69a8ff;
+    --c-ok: #4caf50;
+    --c-err: #ff6b6b;
+    --c-skip: #9aa6b2;
+    border-color: #2a3640;
+}
+
+.pipe.compact {
+    --node-radius: 30px;
+    --node-pad-y: 6px;
+    --node-pad-x: 8px;
+    --gap-x: 20px;
+    --gap-y: 8px;
+}
+
+.pipe-header {
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.title {
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.controls {
+    margin-left: auto;
+    display: inline-flex;
+    gap: 8px;
+}
+
+.legend {
+    display: inline-flex;
+    gap: 10px;
+    font-size: 12px;
+    color: #607d8b;
+}
+
+.legend .lg {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.legend .lg i {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+.legend .lg-queued i {
+    background: var(--c-queued);
+}
+
+.legend .lg-running i {
+    background: var(--c-running);
+}
+
+.legend .lg-success i {
+    background: var(--c-ok);
+}
+
+.legend .lg-error i {
+    background: var(--c-err);
+}
+
+.legend .lg-skipped i {
+    background: var(--c-skip);
+}
+
+.stages {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: var(--gap-x);
+}
+
+.stage {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+}
+
+.stage-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.stage-title {
+    font-size: 12px;
+    color: #607d8b;
+    font-weight: 600;
+}
+
+.nodes {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-y);
+    position: relative;
+    z-index: 2;
+}
+
+.node {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border: 1px solid #e0e0e0;
+    border-radius: var(--node-radius);
+    padding: 0 0 0 var(--node-pad-x);
+    background: var(--c-bg);
+    overflow: hidden;
+}
+
+.node .emblem {
+    flex: 0 0 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+}
+
+.node .emblem .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--c-muted);
+}
+
+.node .emblem .icon {
+    font-size: 23px;
+    width: 28px;
+    height: 28px;
+    opacity: .9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.node .label {
+    flex: 1 1 auto;
+    min-width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 18px;
+}
+
+.run-shimmer {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(110deg, transparent 0%, rgba(30, 136, 229, .06) 35%, transparent 70%);
+    animation: shimmer 1.2s linear infinite;
+    pointer-events: none;
+}
+
+@keyframes shimmer {
+    0% {
+        transform: translateX(-100%);
+    }
+
+    100% {
+        transform: translateX(100%);
+    }
+}
+
+/* status */
+.node.queued {
+    border-color: color-mix(in srgb, var(--c-queued) 45%, #e0e0e0);
+}
+
+.node.running {
+    border-color: var(--c-running);
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--c-running) 20%, transparent);
+}
+
+.node.success {
+    border-color: var(--c-ok);
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--c-ok) 18%, transparent);
+}
+
+.node.error {
+    border-color: var(--c-err);
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--c-err) 18%, transparent);
+}
+
+.node.skipped {
+    border-color: var(--c-skip);
+    color: #616161;
+    opacity: .9;
+}
+
+.node.queued .bar,
+.node.queued .emblem .dot {
+    background: var(--c-queued);
+}
+
+.node.running .bar,
+.node.running .emblem .dot {
+    background: var(--c-running);
+}
+
+.node.success .bar,
+.node.success .emblem .dot {
+    background: var(--c-ok);
+}
+
+.node.error .bar,
+.node.error .emblem .dot {
+    background: var(--c-err);
+}
+
+.node.skipped .bar,
+.node.skipped .emblem .dot {
+    background: var(--c-skip);
+}
+
+.node.is-input {
+    background: var(--mat-success);
+    border: none;
+    display: none;
+}
+
+.node.is-result {
+    background-color: transparent;
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+    overflow: visible
+}
+
+.empty {
+    color: #78909c;
+    font-style: italic;
+}

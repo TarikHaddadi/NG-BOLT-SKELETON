@@ -116,7 +116,8 @@
       "nodeMissingOutput": "Node \"{{id}}\" is missing an outgoing connection.",
       "cycleDetected": "There is a cycle in the workflow. Please remove it.",
       "saveFailed": "Failed to save the workflow.",
-      "noDirectInputToResult":"You cannot connect Input directly to Result."
+      "noDirectInputToResult":"You cannot connect Input directly to Result.",
+      "invalid_fields":"Node has invalid fields"
     }
   },
   "form": {

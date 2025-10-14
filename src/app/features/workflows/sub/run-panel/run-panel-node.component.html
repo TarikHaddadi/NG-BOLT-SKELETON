@@ -1,0 +1,21 @@
+<div class="run-panel">
+    <div class="header">
+        <div class="title">{{ 'workflow.runPanel.title' | translate : { default: 'Run' } }}</div>
+        <button mat-stroked-button color="primary" (click)="triggerRun()" [disabled]="!graphOk()">
+            <mat-icon>play_arrow</mat-icon>
+            <span class="ml-2">{{ 'workflow.runPanel.run' | translate : { default: 'Run simulation' } }}</span>
+        </button>
+    </div>
+
+    @if (pipeline(); as pipe) {
+    <div class="body">
+        <app-pipeline-progress [workflow]="pipe" [runState]="runState()" (stageCancel)="stageCancel($event)"
+            (pipelineCancel)="pipelineCancel()">
+        </app-pipeline-progress>
+    </div>
+    } @else {
+    <div class="empty">
+        {{ 'workflow.runPanel.empty' | translate : { default: 'No pipeline to run yet.' } }}
+    </div>
+    }
+</div>

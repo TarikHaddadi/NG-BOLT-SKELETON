@@ -1,0 +1,28 @@
+.run-panel {
+    padding: 10px;
+    border-radius: 10px;
+    background: var(--md-sys-color-surface);
+    border: 2px solid var(--mat-primary)
+}
+
+.header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.title {
+    font-weight: 600;
+}
+
+.ml-2 {
+    margin-left: .5rem;
+}
+
+.hidden {
+    visibility: hidden;
+    opacity: 0;
+    pointer-events: none;
+}

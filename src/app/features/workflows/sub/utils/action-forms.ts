@@ -18,6 +18,7 @@ export const ACTION_FORMS: Record<string, ActionFormSpec> = {
         label: 'Prompt',
         placeholder: 'Ask anything…',
         rows: 6,
+        required: true,
         validators: [Validators.required],
       }),
       F.getDropdownField({
@@ -29,14 +30,14 @@ export const ACTION_FORMS: Record<string, ActionFormSpec> = {
           { label: '0.7', value: 0.7 },
           { label: '1.0 – Creative', value: 1 },
         ],
-        defaultValue: 0.3,
         required: true,
         validators: [Validators.required],
-        errorMessages: { required: "Temperature is required" }
+        errorMessages: { required: "Temperature is required" },
+        defaultValue:0.3
       }),
     ],
     defaults: {
-      temperature: 0.3,
+      temperature: 0.3
     },
   },
 
@@ -47,13 +48,14 @@ export const ACTION_FORMS: Record<string, ActionFormSpec> = {
         label: 'form.labels.threshold',
         min: 0,
         max: 100,
-        defaultValue:20,
         color: "primary",
         layoutClass: "primary",
         helperText:"form.hints.threshold",
         validators: [Validators.required],
+        required: true,
         errorMessages: { required: "form.errors.threshold" },
         placeholder:"form.placeholders.threshold",
+        defaultValue:20
       }),
     ],
     defaults: {
@@ -64,21 +66,22 @@ export const ACTION_FORMS: Record<string, ActionFormSpec> = {
   summarize: {
     make: (F) => [
       F.getDropdownField({
-        name: 'length',
+        name: 'summary_length',
         label: 'Summary length',
         options: [
           { label: 'Key bullets', value: 'bullets' },
           { label: 'Short (1–2 paragraphs)', value: 'short' },
           { label: 'Detailed (4–6 paragraphs)', value: 'detailed' },
         ],
-        defaultValue: "bullets",
         validators: [Validators.required],
         errorMessages: { required: "Length is required" },
-        required: true
+        required: true,
+        helperText:"Select a sumamry length",
+        defaultValue: "short"
       }),
     ],
     defaults: {
-      length: "bullets",
+      summary_length: "short",
     },
   },
 
@@ -86,8 +89,9 @@ export const ACTION_FORMS: Record<string, ActionFormSpec> = {
     make: (F) => [
       F.getTextAreaField({
         name: 'text',
-        label: 'Text (optional)',
+        label: 'Text',
         placeholder: 'Paste the text to analyze…',
+        required: false,
         rows: 6,
       }),
       F.getTextField({
@@ -95,6 +99,7 @@ export const ACTION_FORMS: Record<string, ActionFormSpec> = {
         label: 'Entities (comma separated)',
         helperText: 'Entities (comma separated)',
         placeholder: 'person, location, organization',
+        required: true,
         validators: [Validators.required],
         errorMessages: { required: "Entities is required" },
       }),
@@ -105,17 +110,19 @@ export const ACTION_FORMS: Record<string, ActionFormSpec> = {
           { label: 'JSON', value: 'json' },
           { label: 'CSV', value: 'csv' },
         ],
-        defaultValue: "json",
         required: true,
         validators: [Validators.required],
         helperText: "Select the return format",
         errorMessages: { required: "Return format is required" },
+        defaultValue: "json"
       }),
     ],
     defaults: {
       format: "json",
     },
   },
+
+
   jira: {
     make: (F) => [
       F.getTextField({
@@ -123,6 +130,7 @@ export const ACTION_FORMS: Record<string, ActionFormSpec> = {
         label: 'Jira site (cloud)',
         placeholder: 'your-domain.atlassian.net',
         validators: [Validators.required],
+        required: true,
         errorMessages: { required: 'Enter your Jira site' },
         helperText: 'Cloud domain without protocol.',
       }),
@@ -130,6 +138,7 @@ export const ACTION_FORMS: Record<string, ActionFormSpec> = {
         name: 'email',
         label: 'Account email',
         placeholder: 'you@example.com',
+        required: true,
         validators: [Validators.required, Validators.email],
         errorMessages: { required: 'Email required', email: 'Invalid email' },
       }),
@@ -137,6 +146,7 @@ export const ACTION_FORMS: Record<string, ActionFormSpec> = {
         name: 'apiToken',
         label: 'API token',
         placeholder: '************************',
+        required: true,
         validators: [Validators.required],
         errorMessages: { required: 'API token required' },
         helperText: 'Create a token in https://id.atlassian.com/manage-profile/security/api-tokens',
@@ -146,6 +156,7 @@ export const ACTION_FORMS: Record<string, ActionFormSpec> = {
         name: 'projectKey',
         label: 'Project key',
         placeholder: 'ABC',
+        required: true,
         validators: [Validators.required],
         errorMessages: { required: 'Project key required' },
       }),
@@ -167,6 +178,7 @@ export const ACTION_FORMS: Record<string, ActionFormSpec> = {
         name: 'summary',
         label: 'Summary',
         placeholder: 'Short title…',
+        required: true,
         validators: [Validators.required, Validators.maxLength(255)],
         errorMessages: { required: 'Summary required', maxLength: 'Max 255 chars' },
       }),
@@ -175,12 +187,14 @@ export const ACTION_FORMS: Record<string, ActionFormSpec> = {
         label: 'Description',
         placeholder: 'Describe the issue…',
         rows: 6,
+        required: false
       }),
       F.getTextField({
         name: 'assignee',
         label: 'Assignee (accountId or email)',
         placeholder: 'user@example.com',
         helperText: "Use email",
+        required: true,
         validators: [Validators.required, Validators.email],
         errorMessages: { required: 'Email required', email: 'Invalid email' },
       }),

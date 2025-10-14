@@ -116,7 +116,8 @@
       "nodeMissingOutput": "Le nœud \"{{id}}\" n’a pas de connexion sortante.",
       "cycleDetected": "Il y a un cycle dans le workflow. Veuillez le supprimer.",
       "saveFailed": "Échec de l’enregistrement du workflow.",
-      "noDirectInputToResult":"Vous ne pouvez pas joindre ces deux éléments."
+      "noDirectInputToResult":"Vous ne pouvez pas joindre ces deux éléments.",
+      "invalid_fields":"Il reste des champs invalides"
     }
   },
   "form": {

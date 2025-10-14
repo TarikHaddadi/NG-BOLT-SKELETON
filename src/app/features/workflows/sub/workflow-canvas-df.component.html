@@ -1,6 +1,7 @@
 <div class="flex flex-wrap workflow-zone">
   <app-dynamic-form class="form" [config]="fieldConfig" [form]="form"></app-dynamic-form>
-  <button mat-fab extended class="palette-toggle primary" color="primary"  (click)="showPalette.set(!showPalette())" [attr.aria-expanded]="showPalette()" matTooltip="Display tools">
+  <button mat-fab extended class="palette-toggle primary" color="primary" (click)="showPalette.set(!showPalette())"
+    [attr.aria-expanded]="showPalette()" matTooltip="Display tools">
     <mat-icon>{{ showPalette() ? 'close' : 'apps' }}</mat-icon>
     {{"toolbox" | translate}}
   </button>
@@ -11,9 +12,9 @@
 
     <div class="pxs-wf-palette-items flex flex-col" #paletteHost>
       @for (a of availableActionsSig(); track a.type) {
-      <button mat-flat-button class="pxs-wf-pill {{a.params?.['class']}}" cdkDrag [cdkDragData]="a" [disabled]="disabledSig()"
-        cdkDragRootElement=".pxs-wf-pill" (cdkDragStarted)="isPaletteDragging.set(true)"
-        (cdkDragEnded)="isPaletteDragging.set(false)"  >
+      <button mat-flat-button class="pxs-wf-pill {{a.params?.['class']}}" cdkDrag [cdkDragData]="a"
+        [disabled]="disabledSig()" cdkDragRootElement=".pxs-wf-pill" (cdkDragStarted)="isPaletteDragging.set(true)"
+        (cdkDragEnded)="isPaletteDragging.set(false)">
         <mat-icon>{{a.params?.["icon"] ?? null}}</mat-icon>{{ a.type | translate }}
         <ng-template cdkDragPreview>
           <button mat-flat-button class="pxs-wf-pill preview">
@@ -30,12 +31,13 @@
   }
 
   <!-- Canvas wrapper is the drop target -->
-  <div class="pxs-wf-canvas-wrap" cdkDropList #canvasList="cdkDropList" [cdkDropListDisabled]="!isPaletteDragging()"
-    [cdkDropListData]="{}" (cdkDropListDropped)="onDrop($any($event))">
+  <div class="pxs-wf-canvas-wrap">
     <ng-draw-flow #flowEl #flow class="pxs-wf-canvas" [ngModel]="dfModel()" (ngModelChange)="onModelChange($event)"
       (nodeSelected)="onNodeSelected($event)" (nodeMoved)="onNodeMoved($event)"
       (connectionCreated)="onConnectionCreated($event)" (connectionDeleted)="onConnectionDeleted($event)"
-      (connectionSelected)="onConnectionSelected($event)" (scale)="onScale($event)" (pan)="onPan($any($event))" (nodeDeleted)="onDeleteNode($event)">
+      (connectionSelected)="onConnectionSelected($event)" (scale)="onScale($event)"
+      (nodeDeleted)="onDeleteNode($event)" cdkDropList #canvasList="cdkDropList"
+      [cdkDropListDisabled]="!isPaletteDragging()" [cdkDropListData]="{}" (cdkDropListDropped)="onDrop($any($event))">
     </ng-draw-flow>
     <p>{{ 'workflow_help' | translate }}</p>
   </div>

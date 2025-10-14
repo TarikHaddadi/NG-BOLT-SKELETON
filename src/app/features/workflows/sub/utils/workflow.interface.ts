@@ -1,0 +1,132 @@
+import { DfDataInitialNode } from "@ng-draw-flow/core";
+
+export interface ActionDefinition {
+    type: string;
+    params?: Record<string, unknown>;
+}
+export type FileRef = string;
+export type RuntimeFile = File | Blob;
+export type PersistableFile = FileRef | RuntimeFile;
+export interface NodeData {
+    label: string;
+}
+export type PortType = 'json' | string;
+export interface WorkflowPort {
+    id: string;
+    label: string;
+    type?: PortType;
+}
+export interface WorkflowPorts {
+    inputs: WorkflowPort[];
+    outputs: WorkflowPort[];
+}
+export type InspectorActionType = 'chat-basic' | 'compare' | 'summarize' | 'extract' | 'jira' | "run-panel";
+export type PaletteType = 'input' | 'result' | InspectorActionType;
+export interface ActionDefinitionLite {
+    type: PaletteType;
+    params?: Record<string, unknown>;
+}
+export interface WorkflowNodeDataBaseParams {
+    icon?: string;
+    ui?: { expanded: boolean }
+    __missingIn?: boolean;
+    __missingOut?: boolean;
+    [k: string]: unknown;
+}
+export interface WorkflowNodeDataBase {
+    label?: string;
+    type?: PaletteType;
+    aiType?: InspectorActionType;
+    ports?: WorkflowPorts;
+    [k: string]: unknown;
+    params?: WorkflowNodeDataBaseParams
+}
+export interface WorkflowNode {
+    id: string;
+    type: PaletteType;
+    x?: number;
+    y?: number;
+    data: WorkflowNodeDataBase;
+    ports: WorkflowPorts;
+}
+export interface WorkflowEdgeStyle {
+    marker?: 'solid' | 'hollow' | 'round' | 'warn';
+    stroke?: string;
+    strokeWidth?: number;
+    dasharray?: string;
+    labelColor?: string;
+    label?: 'auto' | string;
+}
+export interface WorkflowEdge {
+    id: string;
+    source: string;
+    target: string;
+    sourcePort: string;
+    targetPort: string;
+    label: string;
+    style?: WorkflowEdgeStyle;
+}
+export interface DfDataInitialNodeData extends DfDataInitialNode {
+  __missingIn: boolean;
+  __missingOut: boolean;
+}
+
+export type Status = 'queued' | 'running' | 'success' | 'error' | 'skipped';
+
+export interface PipelineWorkflowDTO {
+  name: string;
+  nodes: { id: string; type: string; data?: WorkflowNodeDataBase }[];
+  edges: { id: string; source: string; target: string }[];
+  meta?: {createdAt: string, version:string};
+}
+
+export interface StageNode {
+  id: string;
+  label: string;
+  type: string;
+}
+
+
+/** ===== Helpers & constants ===== */
+export const EXEC_TYPES = new Set<PaletteType>([
+  'input', 'result', 'chat-basic', 'compare', 'summarize', 'extract', 'jira'
+]);
+
+// ---- Types ----
+export type Primitive = string | number | boolean | null;
+export type WithParams<P> = Omit<WorkflowNodeDataBase, 'params'> & { params?: P };
+
+// Binary things we want to strip/cache
+export type Binary = File | Blob;
+
+// What params may contain: plain values, objects/arrays, binaries or arrays of binaries
+export type WithFiles =
+  | Primitive
+  | Binary
+  | Binary[]
+  | { [k: string]: WithFiles }
+  | WithFiles[];
+
+// Placeholders used in sanitized output
+export interface FilePlaceholder { __file: true; name: string; size: number; type: string };
+export interface BlobPlaceholder { __blob: true; size: number; type: string };
+export type BinaryPlaceholder =
+  | { __file: true; name: string; size: number; type: string }
+  | { __blob: true; size: number; type: string };
+// Recursively replace File/Blob/(File[]) with placeholders
+export type ReplaceBinary<T> =
+  T extends File ? FilePlaceholder :
+  T extends Blob ? BlobPlaceholder :
+  T extends (infer U)[] ? ReplaceBinary<U>[] :
+  T extends object ? { [K in keyof T]: ReplaceBinary<T[K]> } :
+  T;
+
+export type Sanitized<T> =
+  ReplaceBinary<NonNullable<T>> |
+  (undefined extends T ? undefined : never);
+
+// Make the event type allow undefined for params
+export interface NodeParamsChangedEvent<T extends WithFiles | undefined = WithFiles | undefined> {
+  nodeId: string;
+  params: T;
+};

@@ -3,10 +3,11 @@ import { CommonModule } from '@angular/common';
 import { SeoComponent } from '@cadai/pxs-ng-core/shared';
 import { LayoutService, ToolbarActionsService } from '@cadai/pxs-ng-core/services';
 import { TranslateModule } from '@ngx-translate/core';
-import { ActionDefinitionLite, ToolbarAction, WorkflowEdge, WorkflowNode } from '@cadai/pxs-ng-core/interfaces';
+import { ToolbarAction } from '@cadai/pxs-ng-core/interfaces';
 import { Router } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { WorkflowCanvasDfComponent } from './sub/workflow-canvas.component';
+import { ActionDefinitionLite, WorkflowEdge, WorkflowNode } from './sub/utils/workflow.interface';
 
 @Component({
     selector: 'app-workflows',
@@ -70,7 +71,6 @@ export class WorkflowsComponent {
     }
 
     onChange(e: { nodes: WorkflowNode[]; edges: WorkflowEdge[] }) {
-        console.log(e)
         this.nodes = e.nodes;
         this.edges = e.edges;
     }
