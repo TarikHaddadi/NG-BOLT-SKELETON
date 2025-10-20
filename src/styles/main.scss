@@ -14,7 +14,7 @@ html.dark {
   --mat-primary: #8534c2;
   --mat-primary-variant: #8534c2;
   --mat-accent: #ff418c;
-  --mat-warn: #ec9a00ff;
+  --mat-warn: #ef7000;
   --mat-neutral: #f1ebeb;
   --mat-success: #1aa21e;
 }
@@ -61,8 +61,8 @@ html.dark {
 
 .mat-primary,
 .primary,
-:root ,
-html.dark{
+:root,
+html.dark {
   --mat-sys-primary: var(--mat-primary);
   --md-sys-color-primary: var(--mat-primary);
   --md-sys-color-surface-tint: var(--mat-primary);
@@ -130,8 +130,8 @@ html.dark{
   --mdc-chip-with-icon-selected-icon-color: #fff;
   --mdc-filled-button-label-text-color: #fff;
   --mdc-switch-selected-handle-color: #fff;
---mdc-switch-selected-hover-handle-color: #fff;
---mdc-switch-selected-pressed-handle-color: #fff;
+  --mdc-switch-selected-hover-handle-color: #fff;
+  --mdc-switch-selected-pressed-handle-color: #fff;
 }
 
 
@@ -406,10 +406,12 @@ html.dark{
 
 html.dark {
   --mdc-switch-selected-handle-color: #fff;
---mdc-switch-selected-hover-handle-color: #fff;
-  .mdc-button.neutral  {
+  --mdc-switch-selected-hover-handle-color: #fff;
+
+  .mdc-button.neutral {
     --mdc-filled-button-label-text-color: var(--mat-primary);
   }
+
   .mdc-button,
   .mdc-fab {
     --mdc-list-list-item-label-text-color: var(--mat-neutral);

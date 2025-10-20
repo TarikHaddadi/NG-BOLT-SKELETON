@@ -6,11 +6,6 @@
 
 
 <section>
-    <app-workflow-canvas-df
-    [nodes]="nodes"
-    [executableNodes]="ExecNodes"
-               [edges]="edges"
-               [actionsNodes]="actionsNodes"
-               [availableActions]="availableActions"
-               (OnCanvasChange)="onChange($any($event))"></app-workflow-canvas-df>
+    <app-workflow-canvas-df [nodes]="nodes" [executableNodes]="ExecNodes" [edges]="edges" [actionsNodes]="actionsNodes"
+        [availableActions]="availableActions" (OnCanvasChange)="onChange($any($event))"></app-workflow-canvas-df>
 </section>

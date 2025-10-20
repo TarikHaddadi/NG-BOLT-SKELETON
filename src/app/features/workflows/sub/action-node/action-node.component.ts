@@ -10,7 +10,7 @@ import {
   isObject,
   PaletteType,
   RESERVED_KEYS,
-  WorkflowNodeDataBase,
+  RunNodeDTO,
   WorkflowNodeDataBaseParams,
   WorkflowPorts,
 } from '../utils/workflow.interface';
@@ -21,16 +21,20 @@ import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { FieldConfigService } from '@cadai/pxs-ng-core/services';
 import { WfCanvasBus } from '../utils/wf-canvas-bus';
 import { ActionFormSpec, makeFallback } from '../utils/action-forms';
-import { debounceTime, distinctUntilChanged, startWith, Subscription } from 'rxjs';
+import { debounceTime, distinctUntilChanged, Observable, startWith, Subscription } from 'rxjs';
 import { DynamicFormComponent } from '@cadai/pxs-ng-core/shared';
 import { FieldConfig } from '@cadai/pxs-ng-core/interfaces';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import type { ReplaceBinary, ReservedKeys, StripReservedShallow } from '../utils/workflow.interface';
+import { Store } from '@ngrx/store';
+import { AppSelectors } from '@cadai/pxs-ng-core/store';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-wf-node',
   standalone: true,
   imports: [
+    CommonModule,
     DfInputComponent,
     DfOutputComponent,
     MatButtonModule,
@@ -42,6 +46,10 @@ import type { ReplaceBinary, ReservedKeys, StripReservedShallow } from '../utils
   ],
   templateUrl: "./action-node.component.html",
   styleUrls: ["./action-node.component.scss"],
+  host: {
+    '(keydown.delete.stop)': '0',
+    '(keydown.backspace.stop)': '0',
+  },
 })
 export class WfNodeComponent extends DrawFlowBaseNode implements OnDestroy, OnInit, DoCheck {
   private bus = inject(WfCanvasBus);
@@ -69,6 +77,10 @@ export class WfNodeComponent extends DrawFlowBaseNode implements OnDestroy, OnIn
   private formFlags = { invalid: false };
 
   @Input({ required: true }) actionsNodes!: Record<string, ActionFormSpec>;
+
+  public isDark$!: Observable<boolean>;
+  store = inject(Store);
+
 
   ngOnInit(): void {
     queueMicrotask(() => this.tryBuildFromModel());
@@ -110,6 +122,8 @@ export class WfNodeComponent extends DrawFlowBaseNode implements OnDestroy, OnIn
     );
 
     this.actionsNodes = this.model?.['actionsNodes'];
+
+    this.isDark$ = this.store.select(AppSelectors.ThemeSelectors.selectIsDark);
   }
 
   ngDoCheck(): void {
@@ -176,8 +190,8 @@ export class WfNodeComponent extends DrawFlowBaseNode implements OnDestroy, OnIn
       .map(([name]) => labelsByName.get(name) ?? name);
   }
 
-  private coerceModel(raw: unknown): WorkflowNodeDataBase {
-    const data = (raw ?? {}) as WorkflowNodeDataBase;
+  private coerceModel(raw: unknown): RunNodeDTO {
+    const data = (raw ?? {}) as RunNodeDTO;
     const type = (data.type ?? data.aiType ?? 'input') as PaletteType;
     const ports = data.ports;
     return { type, ports, params: data.params, aiType: data.aiType, label: data.label, position: data?.['position'], actionsNodes: data?.['actionsNodes'] };
@@ -466,5 +480,11 @@ export class WfNodeComponent extends DrawFlowBaseNode implements OnDestroy, OnIn
       .filter(([k]) => !RESERVED_SET.has(k as ReservedKeys));
 
     return Object.fromEntries(entries) as StripReservedShallow<T>;
+  }
+
+  closePanel() {
+    this.bus.onNodeDelete$.next({
+      nodeId: this.nodeId
+    });
   }
 }

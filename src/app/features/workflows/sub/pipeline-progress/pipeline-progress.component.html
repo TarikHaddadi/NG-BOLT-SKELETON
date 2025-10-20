@@ -1,24 +1,4 @@
 <div class="pipe" [class.compact]="compact">
-    <div class="pipe-header">
-        <div class="controls">
-            <button mat-flat-button class="warn" (click)="onCancelPipeline()
-            " [disabled]="!canCancelPipeline()" [matTooltip]="'workflow.runPanel.cancel_pipe' | translate">
-                <mat-icon>cancel</mat-icon>
-                {{ 'workflow.runPanel.cancel_pipe' | translate }}
-            </button>
-        </div>
-
-        @if (showLegend) {
-        <div class="legend">
-            <span class="lg lg-queued"><i></i>{{ 'workflow.runPanel.queued' | translate }}</span>
-            <span class="lg lg-running"><i></i>{{ 'workflow.runPanel.running' | translate }}</span>
-            <span class="lg lg-success"><i></i>{{ 'workflow.runPanel.success' | translate }}</span>
-            <span class="lg lg-error"><i></i>{{ 'workflow.runPanel.error' | translate }}</span>
-            <span class="lg lg-skipped"><i></i>{{ 'workflow.runPanel.skipped' | translate }}</span>
-        </div>
-        }
-    </div>
-
     @if (stages().length) {
     <div class="stages">
         @for (col of stages(); track $index; let i = $index) {
@@ -28,21 +8,18 @@
                 <div class="node" [class.is-input]="n.type === 'input'" [class.is-result]="n.type === 'result'"
                     [class.queued]="statusOf(n.id) === 'queued'" [class.running]="statusOf(n.id) === 'running'"
                     [class.success]="statusOf(n.id) === 'success'" [class.error]="statusOf(n.id) === 'error'"
-                    [class.skipped]="statusOf(n.id) === 'skipped'">
+                    [class.skipped]="statusOf(n.id) === 'skipped'" [matTooltip]="statusOf(n.id) | translate">
 
                     @if (n.type !== 'result') {
                     <div class="emblem">
                         <span class="dot"></span>
-                        @if (n.type === 'input') {
-                            <mat-icon >input</mat-icon>
-                        }
                         @if (statusOf(n.id) === 'queued') { <mat-icon class="icon">hourglass_empty</mat-icon> }
                         @if (statusOf(n.id) === 'running') { <mat-icon class="icon">play_arrow</mat-icon> }
                         @if (statusOf(n.id) === 'success') { <mat-icon class="icon">check_circle</mat-icon> }
                         @if (statusOf(n.id) === 'error') { <mat-icon class="icon">error</mat-icon> }
                     </div>
 
-                    <div class="label" [matTooltip]="n.label">{{ n.label | translate }}</div>
+                    <div class="label">{{ n.label | translate }}</div>
 
                     @if (statusOf(n.id) === 'running') {
                     <div class="run-shimmer"></div>
@@ -55,26 +32,27 @@
                             <mat-icon>more_horiz</mat-icon>
                         </button>
                         <mat-menu #menu="matMenu">
+                            <button mat-menu-item (click)="seeDetails(n,'auto')">
+                                <mat-icon>details</mat-icon>
+                                <span>{{ 'workflow.runPanel.details' | translate }}</span>
+                            </button>
+                            <button mat-menu-item (click)="seeDetails(n,'artifacts')">
+                                <mat-icon>archive</mat-icon>
+                                <span>{{ 'workflow.runPanel.artifacts' | translate }}</span>
+                            </button>
                             @if(n.label ==="chat"){
                             <button mat-menu-item>
                                 <mat-icon>chat_paste_go</mat-icon>
                                 <span>{{ 'workflow.runPanel.go_chat' | translate }}</span>
                             </button>
                             }
-                            <button mat-menu-item (click)="seeDetails()">
-                                <mat-icon>details</mat-icon>
-                                <span>{{ 'workflow.runPanel.details' | translate }}</span>
-                            </button>
-                            <button mat-menu-item>
-                                <mat-icon>archive</mat-icon>
-                                <span>{{ 'workflow.runPanel.artifacts' | translate }}</span>
-                            </button>
                         </mat-menu>
                     </div>
+
                     } @else {
                     @if (n.type === 'result') {
-                    <button mat-icon-button color="primary" class="primary"
-                        [matTooltip]="'workflow.runPanel.options' | translate" [matMenuTriggerFor]="menu">
+                    <button mat-icon-button [matTooltip]="'workflow.runPanel.options' | translate" class="primary"
+                        [matMenuTriggerFor]="menu">
                         <mat-icon>more_horiz</mat-icon>
                     </button>
                     <mat-menu #menu="matMenu">
@@ -82,11 +60,18 @@
                             <mat-icon>delete</mat-icon>
                             <span>{{ 'delete' | translate }}</span>
                         </button>
+                        <button mat-menu-item (click)="onCancelPipeline()" [disabled]="!canCancelPipeline()"
+                            [matTooltip]="'workflow.runPanel.cancel_pipe' | translate">
+                            <mat-icon>cancel</mat-icon>
+                            {{ 'workflow.runPanel.cancel_pipe' | translate }}
+                        </button>
                     </mat-menu>
+
                     }
 
                     }
                 </div>
+
                 }
             </div>
         </div>

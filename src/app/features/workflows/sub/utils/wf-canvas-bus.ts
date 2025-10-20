@@ -1,7 +1,6 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Subject } from 'rxjs';
-import { PipelineWorkflowDTO, RunEntry, WorkflowNodeDataBaseParams } from './workflow.interface';
-
+import { PipelineWorkflowDTO, PreferredTab, RunEntry, RunNodeDTO, WorkflowNodeDataBaseParams } from './workflow.interface';
 
 @Injectable({ providedIn: 'root' })
 export class WfCanvasBus {
@@ -15,6 +14,7 @@ export class WfCanvasBus {
   stageCancel$ = new Subject<{ index: number; nodeIds: string[]; runId?: string }>();
   pipelineCancel$ = new Subject<{ runId?: string }>();
   toggleRunPanel$ = new Subject<{ anchorNodeId?: string }>();
+  onNodeDelete$ = new Subject<{ nodeId: string }>();
   nodeFormStatus$ = new Subject<{ nodeId: string; invalid: boolean; invalidFields?: string[] }>();
   nodeFlagsPatch$ = new Subject<{ nodeId: string; flags: Record<string, unknown> }>();
   runs$ = new BehaviorSubject<RunEntry[]>([]);
@@ -30,5 +30,11 @@ export class WfCanvasBus {
     sourcePortId: string;
     actionType: string;
     icon: string;
+  }>();
+  toggleDetailsPanel$ = new Subject<{
+    dto?: RunNodeDTO;
+    preferredTab?: PreferredTab;
+    title?: string;
+    toggleOff?: boolean;
   }>();
 }

@@ -15,7 +15,7 @@
 }
 
 .wf-node.result {
-    background: var(--mat-accent, #7b1fa2);
+    background: var(--mat-success, #7b1fa2);
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -33,7 +33,7 @@
 
 .wf-node.is-selected {
     outline: 2px solid #42a5f5;
-    outline-offset: 2px;
+    outline-offset: 5px;
 }
 
 .header {

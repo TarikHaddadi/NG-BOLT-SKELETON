@@ -34,6 +34,8 @@
   "extract": "Extract",
   "run-panel": "Run panel",
   "threshold":"Threshold",
+        "toggle":"Fold",
+"untoggle":"Unfold",
   "table": {
     "paginator": {
       "itemsPerPage": "Items per page",
@@ -108,7 +110,11 @@
       "options":"View options",
       "go_chat":"Go to chat",
       "artifacts":"Artifacts",
-      "details":"Details"
+      "details":"Details",
+      "results":"Results",
+      "auto":"Auto",
+      "params":"Params",
+      "logs":"Logs"
     },
     "errors": {
       "exactlyOneInput": "The workflow must have exactly one Input node.",

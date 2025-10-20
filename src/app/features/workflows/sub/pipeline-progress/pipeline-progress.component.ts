@@ -1,11 +1,13 @@
-import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output, computed, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatButtonModule } from '@angular/material/button';
 import { TranslateModule } from '@ngx-translate/core';
 import { MatMenuModule } from '@angular/material/menu';
-import { PipelineWorkflowDTO, StageNode, Status } from '../utils/workflow.interface';
+import { PipelineWorkflowDTO, PreferredTab, StageNode, Status, WorkflowNode } from '../utils/workflow.interface';
+import { WfCanvasBus } from '../utils/wf-canvas-bus';
+import {  DrawFlowBaseNode } from '@ng-draw-flow/core';
 
 @Component({
   selector: 'app-pipeline-progress',
@@ -15,20 +17,30 @@ import { PipelineWorkflowDTO, StageNode, Status } from '../utils/workflow.interf
   styleUrls: [`./pipeline-progress.component.scss`],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class PipelineProgressComponent {
+export class PipelineProgressComponent extends DrawFlowBaseNode {
   @Input() set workflow(v: PipelineWorkflowDTO | null | undefined) { this._wf.set(v ?? null); }
   @Input() set runState(v: Record<string, Status> | null | undefined) { this._run.set(v ?? {}); }
   @Input() compact = true;
-  @Input() showLegend = true;
   @Input() applyCancelLocally = true;
 
   @Output() pipelineCancel = new EventEmitter<void>();
   @Output() stageCancel = new EventEmitter<{ index: number; nodeIds: string[] }>();
 
+  readonly outputPort = {
+    id: crypto?.randomUUID?.() ?? `node-result-out-${Math.random().toString(36).slice(2)}`,
+    label: 'out',
+    type: 'json',
+  };
+
+  readonly ports: WorkflowNode['ports'] = {
+    inputs: [],
+    outputs: [this.outputPort],
+  };
   private _wf = signal<PipelineWorkflowDTO | null>(null);
   private _run = signal<Record<string, Status>>({});
 
-  private readonly EXCLUDED = new Set(['input']);
+  private readonly EXCLUDED = new Set(['result']);
+  private canvasBus = inject(WfCanvasBus);
 
   private isActionable = (t: string) => !this.EXCLUDED.has(t);
 
@@ -81,6 +93,10 @@ export class PipelineProgressComponent {
     return layers;
   });
 
+  stageOutputId(stageId: string): string {
+    return `pipe-${this.nodeId}-out-${stageId}`;
+  }
+
   statusOf = (id: string): Status => {
     const wf = this._wf();
     if (!wf) return 'queued';
@@ -112,7 +128,17 @@ export class PipelineProgressComponent {
     this._run.set(next);
   }
 
-  seeDetails() {
-    return;
+  seeDetails(n: StageNode, preferredtab: PreferredTab) {
+    const wf = this._wf(); if (!wf) return;
+    const node = wf.nodes.find(x => x.id === n.id);
+
+    if (!node) return;
+    this.canvasBus.toggleDetailsPanel$.next({
+      dto: node.data,
+      title: node.data?.label,
+      toggleOff: false,
+      preferredTab: preferredtab
+    });
   }
+
 }

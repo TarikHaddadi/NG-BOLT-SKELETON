@@ -4,7 +4,7 @@
   min-height: calc(100vh - 100px);
 }
 
-::ng-deep  html.dark .pan-zoom {
+::ng-deep html.dark .pan-zoom {
   background-color: var(--mat-sys-on-surface);
   background-image: url("data:image/svg+xml,%3Csvg xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22 width%3D%2210%22 height%3D%2210%22 viewBox%3D%220 0 10 10%22 fill%3D%22none%22%3E%3Ccircle cx%3D%225%22 cy%3D%225%22 r%3D%221%22 fill%3D%22%23FFFFFF%22 fill-opacity%3D%220.3%22%2F%3E%3C%2Fsvg%3E");
 }
@@ -18,22 +18,34 @@
 .pxs-wf-palette {
   padding-right: 12px;
   flex: 1;
-    top: 178px;
-    left: 11px;
+  top: 70px;
+  left: 375px;
   border-radius: 15px;
   z-index: 9;
   padding: 8px;
 }
+
 .palette-toggle {
-  position: absolute;   // or absolute relative to your canvas wrapper
-  top: 120px;
-  left: 20px;
+  position: absolute;
+  top: 14px;
+  left: 380px;
   z-index: 1000;
-  border: 2px solid var(--mat-primary);
+  background-color: var(--mat-primary);
+  color: #fff;
 }
+
+.run-panel-btn {
+  position: absolute;
+  top: 14px;
+  left: 520px;
+  z-index: 1000;
+  background-color: var(--mat-primary);
+  color: #fff;
+}
+
 /* Overlay palette panel */
 .pxs-wf-palette.overlay {
-  position: absolute; 
+  position: absolute;
   transition: transform .18s ease, opacity .18s ease;
 }
 
@@ -43,7 +55,6 @@
   gap: 8px;
 }
 
-/* Slide/opacity hide */
 .pxs-wf-palette.overlay.hidden {
   transform: translateX(-16px) translateY(-8px) scale(.98);
   opacity: 0;
@@ -55,10 +66,15 @@
   top: 3px;
   left: 3px;
   min-width: 350px;
-  background: var(--md-sys-color-surface);
   border-radius: 15px;
   z-index: 9;
   padding: 8px;
+
+  ::ng-deep {
+    .mdc-text-field {
+      background: var(--md-sys-color-surface);
+    }
+  }
 }
 
 .pxs-wf-canvas {
@@ -120,32 +136,32 @@
 }
 
 .quick-add {
-    display: flex;
-    flex-direction: column;
-    padding: 6px;
-    border-radius: 8px;
-    background: var(--md-sys-color-surface);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, .24);
-    min-width: 220px;
-    max-height: 320px;
-    overflow: auto;
-    gap: 2px;
-    overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  padding: 6px;
+  border-radius: 8px;
+  background: var(--md-sys-color-surface);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, .24);
+  min-width: 220px;
+  max-height: 320px;
+  overflow: auto;
+  gap: 2px;
+  overflow: hidden;
 }
 
 .quick-title {
-    font-weight: 600;
-    padding: 6px 8px;
-    opacity: .8;
+  font-weight: 600;
+  padding: 6px 8px;
+  opacity: .8;
 }
 
 .quick-item {
-    justify-content: flex-start;
-    border-radius: 5px;
+  justify-content: flex-start;
+  border-radius: 5px;
 }
 
 .quick-empty {
-    padding: 8px;
-    opacity: .7;
-    font-style: italic;
+  padding: 8px;
+  opacity: .7;
+  font-style: italic;
 }

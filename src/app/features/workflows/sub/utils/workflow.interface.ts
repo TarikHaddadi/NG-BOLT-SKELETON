@@ -1,64 +1,56 @@
 import { DfDataInitialNode } from "@ng-draw-flow/core";
 
 export interface ActionDefinition {
-    type: string;
-    params?: Record<string, unknown>;
+  type: string;
+  params?: Record<string, unknown>;
 }
 export type FileRef = string;
 export type RuntimeFile = File | Blob;
 export type PersistableFile = FileRef | RuntimeFile;
 export interface NodeData {
-    label: string;
+  label: string;
 }
 export type PortType = 'json' | string;
 export interface WorkflowPort {
-    id: string;
-    label: string;
-    type?: PortType;
+  id: string;
+  label: string;
+  type?: PortType;
 }
 export interface WorkflowPorts {
-    inputs: WorkflowPort[];
-    outputs: WorkflowPort[];
+  inputs: WorkflowPort[];
+  outputs: WorkflowPort[];
 }
 export type InspectorActionType = string;
 export type PaletteType = 'input' | 'result' | InspectorActionType;
 export interface ActionDefinitionLite {
-    type: PaletteType;
-    params?: {
-      icon: string;
-      [K:string]:unknown
-    };
+  type: PaletteType;
+  params?: {
+    icon: string;
+    [K: string]: unknown
+  };
 }
 export interface WorkflowNodeDataBaseParams {
-    icon?: string;
-    ui?: { expanded?: boolean }
-    __missingIn?: boolean;
-    __missingOut?: boolean;
-    [k: string]: unknown;
-}
-export interface WorkflowNodeDataBase {
-    label?: string;
-    type?: PaletteType;
-    aiType?: InspectorActionType;
-    ports?: WorkflowPorts;
-    [k: string]: unknown;
-    params?: WorkflowNodeDataBaseParams
+  icon?: string;
+  ui?: { expanded?: boolean }
+  __missingIn?: boolean;
+  __missingOut?: boolean;
+  [k: string]: unknown;
 }
 export interface WorkflowNode {
-    id: string;
-    type: PaletteType;
-    x?: number;
-    y?: number;
-    data: WorkflowNodeDataBase;
-    ports: WorkflowPorts;
+  id: string;
+  type: PaletteType;
+  x?: number;
+  y?: number;
+  data: RunNodeDTO;
+  ports: WorkflowPorts;
 }
 export interface WorkflowEdge {
-    id: string;
-    source: string;
-    target: string;
-    sourcePort: string;
-    targetPort: string;
-    label: string;
+  id: string;
+  source: string;
+  target: string;
+  sourcePort: string;
+  targetPort: string;
+  label: string;
 }
 export interface DfDataInitialNodeData extends DfDataInitialNode {
   __missingIn: boolean;
@@ -69,9 +61,9 @@ export type Status = 'queued' | 'running' | 'success' | 'error' | 'skipped';
 
 export interface PipelineWorkflowDTO {
   name: string;
-  nodes: { id: string; type: string; data?: WorkflowNodeDataBase }[];
+  nodes: { id: string; type: string; data?: RunNodeDTO }[];
   edges: { id: string; source: string; target: string }[];
-  meta?: {createdAt: string, version:string; filesByNode: Record<string, Record<string, Binary | Binary[]>>};
+  meta?: { createdAt: string, version: string; filesByNode: Record<string, Record<string, Binary | Binary[]>> };
 }
 
 export interface StageNode {
@@ -88,7 +80,7 @@ export const EXEC_TYPES = new Set<PaletteType>([
 
 // ---- Types ----
 export type Primitive = string | number | boolean | null;
-export type WithParams<P> = Omit<WorkflowNodeDataBase, 'params'> & { params?: P };
+export type WithParams<P> = Omit<RunNodeDTO, 'params'> & { params?: P };
 
 // Binary things we want to strip/cache
 export type Binary = File | Blob;
@@ -125,7 +117,7 @@ export interface NodeParamsChangedEvent<T extends WithFiles | undefined = WithFi
   params: T;
 };
 
-export interface SimCtx  {
+export interface SimCtx {
   running: boolean;
   indeg: Map<string, number>;
   ready: string[];
@@ -142,13 +134,13 @@ export interface RunEntry {
 };
 
 
-export const RESERVED_KEYS = ['ui', '__missingIn', '__missingOut'] as const;
+export const RESERVED_KEYS = ['icon','ui', '__missingIn', '__missingOut'] as const;
 export type ReservedKeys = typeof RESERVED_KEYS[number];
 
 export type StripReservedShallow<T> =
   T extends object
-    ? { [K in keyof T as K extends ReservedKeys ? never : K]: T[K] }
-    : T;
+  ? { [K in keyof T as K extends ReservedKeys ? never : K]: T[K] }
+  : T;
 
 export const isObject = (v: unknown): v is Record<string, unknown> =>
   typeof v === 'object' && v !== null;
@@ -157,3 +149,28 @@ export const hasProp = <K extends string>(
   o: unknown,
   k: K
 ): o is Record<K, unknown> => isObject(o) && k in o;
+
+
+export interface LogEntry { at: string; level: 'info' | 'warn' | 'error'; message: string };
+export interface ArtifactEntry  {
+    name: string;
+    href?: string;
+}
+export interface RunNodeDTO {
+  id?: string;
+  result?: Record<string, unknown>; // TODO . Get back here when Backend is ready
+  error?: Record<string, unknown>; // TODO . Get back here when Backend is ready
+  logs?: LogEntry[];
+  artifacts?: ArtifactEntry[];
+  status?: Status;
+  params?: WorkflowNodeDataBaseParams;
+  label?: string;
+  type?: PaletteType;
+  aiType?: InspectorActionType;
+  ports?: WorkflowPorts;
+  preferredTab?:PreferredTab;
+  [k: string]: unknown;
+}
+
+export type PreferredTab = 'auto' | 'params' | 'results' | 'error' | 'logs' | 'artifacts';
+

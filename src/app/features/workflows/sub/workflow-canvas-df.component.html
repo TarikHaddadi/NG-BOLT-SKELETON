@@ -1,7 +1,13 @@
 <div class="flex flex-wrap workflow-zone">
   <app-dynamic-form class="form" [config]="fieldConfig" [form]="form"></app-dynamic-form>
-  <button mat-fab extended class="palette-toggle primary" color="primary" (click)="showPalette.set(!showPalette())"
-    [attr.aria-expanded]="showPalette()" matTooltip='{{"toolbox" | translate}}'>
+    <button mat-fab extended class="run-panel-btn" color="warn" (click)="toggleRunPanel()"
+    [attr.aria-expanded]="showRunPanel()" matTooltip="{{showRunPanel() ? 'close' : 'open' }}">
+    <mat-icon>{{ showRunPanel() ? 'visibility_off' : 'visibility' }}</mat-icon>
+    {{"run-panel" | translate}}
+  </button>
+
+  <button mat-fab extended class="palette-toggle" color="primary" (click)="showPalette.set(!showPalette())"
+    [attr.aria-expanded]="showPalette()" matTooltip="{{showPalette() ? 'close' : 'open' }}">
     <mat-icon>{{ showPalette() ? 'close' : 'apps' }}</mat-icon>
     {{"toolbox" | translate}}
   </button>
@@ -35,7 +41,7 @@
     <ng-draw-flow #flowEl #flow class="pxs-wf-canvas" [ngModel]="dfModel()" (ngModelChange)="onModelChange($event)"
       (nodeSelected)="onNodeSelected($event)" (nodeMoved)="onNodeMoved($event)"
       (connectionCreated)="onConnectionCreated($event)" (connectionDeleted)="onConnectionDeleted($event)"
-      (connectionSelected)="onConnectionSelected($event)" (scale)="onScale($event)" (nodeDeleted)="onDeleteNode($event)"
+      (connectionSelected)="onConnectionSelected($event)" (scale)="onScale($event)" (nodeDeleted)="onDeleteNode($event.target.id)"
       cdkDropList #canvasList="cdkDropList" [cdkDropListDisabled]="!isPaletteDragging()" [cdkDropListData]="{}"
       (cdkDropListDropped)="onDrop($any($event))">
     </ng-draw-flow>

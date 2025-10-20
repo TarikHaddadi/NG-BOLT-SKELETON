@@ -39,7 +39,7 @@ export class WorkflowsComponent {
     }, {
         id: 'result-node',
         type: 'result',
-        x: 760, y: 0,
+        x: 1060, y: 0,
         data: { label: 'Result' },
         ports: { inputs: [{ id: 'in', label: 'in', type: 'json' }], outputs: [] },
     }];

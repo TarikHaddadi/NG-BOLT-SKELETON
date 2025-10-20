@@ -33,6 +33,9 @@
   "summarize": "Résumer",
   "extract": "Extraire",
   "run-panel": "Panneau d'éxécutions",
+  "threshold":"Threshold",
+    "toggle":"Plier",
+"untoggle":"Déplier",
   "table": {
     "paginator": {
       "itemsPerPage": "Éléments par page",
@@ -108,7 +111,11 @@
       "options":"Options",
       "go_chat":"Aller au chat",
       "artifacts":"Artéfacts",
-      "details":"Détails"
+      "details":"Détails",
+      "results":"Résultats",
+      "params":"Paramètres",
+      "logs":"Logs",
+      "auto":"Auto"
     },
     "errors": {
       "exactlyOneInput": "Le workflow doit comporter exactement un nœud d’entrée.",
