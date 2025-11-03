@@ -72,9 +72,7 @@
 
     @if(visualType() === 'input') {
     <div class="inline-editor" [class.hidden]="!expanded()">
-        <app-dynamic-form [form]="formInputs" [config]="configInputs" (keydown.delete)="$event.stopPropagation()"
-            (keydown.backspace)="$event.stopPropagation()" (pointerdown)="$event.stopPropagation()"
-            (mousedown)="$event.stopPropagation()" (touchstart)="$event.stopPropagation()"></app-dynamic-form>
+        <app-dynamic-form [form]="formInputs" [config]="configInputs" ></app-dynamic-form>
     </div>
     }
     @if(visualType() !== 'input' && visualType() !== 'result') {

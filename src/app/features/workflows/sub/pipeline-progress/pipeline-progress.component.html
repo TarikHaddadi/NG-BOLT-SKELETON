@@ -40,6 +40,10 @@
                                 <mat-icon>archive</mat-icon>
                                 <span>{{ 'workflow.runPanel.artifacts' | translate }}</span>
                             </button>
+                            <button mat-menu-item (click)="previewNode(n)">
+                                <mat-icon>preview</mat-icon>
+                                <span>{{ 'workflow.runPanel.preview' | translate }}</span>
+                            </button>
                             @if(n.label ==="chat"){
                             <button mat-menu-item>
                                 <mat-icon>chat_paste_go</mat-icon>
@@ -66,12 +70,9 @@
                             {{ 'workflow.runPanel.cancel_pipe' | translate }}
                         </button>
                     </mat-menu>
-
                     }
-
                     }
                 </div>
-
                 }
             </div>
         </div>

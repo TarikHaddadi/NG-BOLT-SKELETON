@@ -2,6 +2,7 @@
 import { CdkDragDrop, DragDropModule } from '@angular/cdk/drag-drop';
 import { CommonModule } from '@angular/common';
 import {
+  AfterViewInit,
   ChangeDetectionStrategy,
   Component,
   computed,
@@ -14,6 +15,7 @@ import {
   OnDestroy,
   OnInit,
   Output,
+  Renderer2,
   signal,
   ViewChild,
 } from '@angular/core';
@@ -57,21 +59,22 @@ import {
   WorkflowNode,
   RunNodeDTO,
   WorkflowNodeDataBaseParams
-} from './utils/workflow.interface';
+} from '../utils/workflow.interface';
 import { FieldConfigService, ToastService, ToolbarActionsService } from '@cadai/pxs-ng-core/services';
 import { MatTooltipModule } from '@angular/material/tooltip';
 
 import { WfNodeComponent } from './action-node/action-node.component';
 import { DynamicFormComponent } from '@cadai/pxs-ng-core/shared';
-import { WfCanvasBus } from './utils/wf-canvas-bus';
+import { WfCanvasBus } from '../utils/wf-canvas-bus';
 import { MatIconModule } from '@angular/material/icon';
 import { WfRunPanelNodeComponent } from './run-panel/run-panel-node.component';
 import { FieldConfig, ToolbarAction } from '@cadai/pxs-ng-core/interfaces';
 import { map, Subscription } from 'rxjs';
 import { OverlayModule } from '@angular/cdk/overlay';
 import { MatMenuModule } from '@angular/material/menu';
-import { ActionFormSpec } from './utils/action-forms';
+import { ActionFormSpec } from '../utils/action-forms';
 import { WfDetailsNodeComponent } from './details-node/detail-node.component';
+import { WfPreviewNodeComponent } from './preview-node/preview-node.compoennt';
 
 @Component({
   selector: 'app-workflow-canvas-df',
@@ -105,10 +108,11 @@ import { WfDetailsNodeComponent } from './details-node/detail-node.component';
         jira: WfNodeComponent,
         'run-panel': WfRunPanelNodeComponent,
         details: WfDetailsNodeComponent,
+        preview: WfPreviewNodeComponent,
       },
       connection: {
         type: DfConnectionType.SmoothStep,
-        arrowhead: { type: DfArrowhead.None, height: 15, width: 15 },
+        arrowhead: { type: DfArrowhead.ArrowClosed, height: 8, width: 8 },
         curvature: 10,
       }
     }),
@@ -117,7 +121,7 @@ import { WfDetailsNodeComponent } from './details-node/detail-node.component';
   styleUrls: ['./workflow-canvas-df.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class WorkflowCanvasDfComponent implements OnInit, OnDestroy {
+export class WorkflowCanvasDfComponent implements OnInit, OnDestroy, AfterViewInit {
   @ViewChild('flow', { static: true }) flow!: NgDrawFlowComponent;
   @ViewChild('flowEl', { static: true, read: ElementRef })
   private flowElementRef!: ElementRef<HTMLElement>;
@@ -387,6 +391,7 @@ export class WorkflowCanvasDfComponent implements OnInit, OnDestroy {
     private readonly fb: FormBuilder,
     private readonly fields: FieldConfigService,
     private toast: ToastService,
+    private renderer: Renderer2
   ) {
     this.subs.add(
       this.bus.nodeParamsChanged$.subscribe((e) =>
@@ -460,10 +465,17 @@ export class WorkflowCanvasDfComponent implements OnInit, OnDestroy {
         this.toggleDetailsPanel(dto, preferredTab, title, toggleOff)
       )
     );
+
+    this.subs.add(
+      this.bus.togglePreviewPanel$.subscribe(({ dto, title, toggleOff }) =>
+        this.togglePreviewPanel(dto, title, toggleOff)
+      )
+    );
     this.subs.add(
       this.bus.onNodeDelete$.subscribe(({ nodeId }) => this.onDeleteNode(nodeId))
     );
 
+    // Menu naviagtion declarations
     const saveWorkflow: ToolbarAction = {
       id: 'save_workflow',
       icon: 'save',
@@ -494,6 +506,22 @@ export class WorkflowCanvasDfComponent implements OnInit, OnDestroy {
       disabled$: this.bus.graphValid$.pipe(map((c) => !c))
     };
     this.toolbar.scope(this.destroyRef, [saveWorkflow, draftWorkflow, publishWorkflow]);
+  }
+
+
+  ngAfterViewInit() {
+    const el = this.flowElementRef.nativeElement;
+    
+    // Check if the selected Node is the scene to remove selected outline 
+    this.subs.add(this.renderer.listen(el, 'click', (ev: MouseEvent) => {
+      const target = ev.target as HTMLElement | null;
+      const isScene =
+        target === el || (target && target.tagName.toUpperCase() === 'DF-SCENE') || (target && target.tagName.toUpperCase() === 'PATH');
+
+      if (isScene) {
+        this.setSelectedNode(null);
+      }
+    }));
   }
 
   ngOnInit(): void {
@@ -586,7 +614,7 @@ export class WorkflowCanvasDfComponent implements OnInit, OnDestroy {
 
     const all = this.allNodes();
     let anchor: WorkflowNode | undefined;
-    
+
     if (anchorNodeId) {
       anchor = all.find(n => n.id === anchorNodeId) || all.find(n => n.type === 'result');
       const rp: WorkflowNode = {
@@ -644,6 +672,45 @@ export class WorkflowCanvasDfComponent implements OnInit, OnDestroy {
         label: title ?? dto?.label ?? 'workflow.runPanel.details',
         title: title ?? dto?.label ?? 'workflow.runPanel.details',
         preferredTab,
+        ...dto,
+      },
+      ports: { inputs: [], outputs: [] },
+    };
+
+    this.uiNodes.set([...ui, dn]);
+
+    const withUi = this.withUiConnectivity(this.allNodes(), this._edges());
+    this.execNodes.set(withUi.filter(n => this.isExecutableNode(n)));
+    this.uiNodes.set(withUi.filter(n => !this.isExecutableNode(n)));
+  }
+
+  private togglePreviewPanel(
+    dto?: RunNodeDTO,
+    title?: string,
+    toggleOff?: boolean
+  ): void {
+    const DETAILS_ID = 'preview-node' + '-' + title;
+    const ui = this.uiNodes();
+
+    const idx = ui.findIndex(n => n.id === DETAILS_ID);
+
+    if (toggleOff || idx >= 0) {
+      const nextUi = ui.slice();
+      nextUi.splice(idx, 1);
+      this.uiNodes.set(nextUi);
+
+      const withUi = this.withUiConnectivity(this.allNodes(), this._edges());
+      this.execNodes.set(withUi.filter(n => this.isExecutableNode(n)));
+      this.uiNodes.set(withUi.filter(n => !this.isExecutableNode(n)));
+      return;
+    }
+
+    const dn: WorkflowNode = {
+      id: DETAILS_ID,
+      type: 'preview',
+      data: {
+        label: title ?? dto?.label ?? 'workflow.runPanel.preview',
+        title: title ?? dto?.label ?? 'workflow.runPanel.preview',
         ...dto,
       },
       ports: { inputs: [], outputs: [] },
@@ -895,6 +962,10 @@ export class WorkflowCanvasDfComponent implements OnInit, OnDestroy {
   onNodeSelected(e: unknown): void {
     const nodeId = (e as { id?: string; nodeId?: string }).id ?? (e as { nodeId?: string }).nodeId ?? null;
     this.setSelectedNode(nodeId);
+  }
+
+  onCanvasCLick() {
+    this.setSelectedNode(null);
   }
 
   onNodeMoved(_evt: unknown): unknown {
@@ -1197,7 +1268,7 @@ export class WorkflowCanvasDfComponent implements OnInit, OnDestroy {
         }
         unlockChildren(id);
         step();
-      }, 1400);
+      }, 3000);
 
       sim.timers.set(id, to);
     };
@@ -1498,7 +1569,7 @@ export class WorkflowCanvasDfComponent implements OnInit, OnDestroy {
           id,
           type: 'result',
           x: (sourceNode?.x ?? 0) + 470,
-          y: (sourceNode?.y ?? 0) + 100,
+          y: (sourceNode?.y ?? 0) + 150,
           data: { label: this.humanLabelFor('result' as PaletteType), params: { ui: { expanded: true } } },
           ports,
         };
@@ -1536,7 +1607,7 @@ export class WorkflowCanvasDfComponent implements OnInit, OnDestroy {
     const node: WorkflowNode = {
       id,
       type: actionType as PaletteType,
-      x: (sourceNode?.x ?? 0) + 500,
+      x: (sourceNode?.x ?? 0) + 650,
       y: 0,
       data: {
         label: this.humanLabelFor(actionType as PaletteType),

@@ -1,0 +1,90 @@
+<div [class]="getMessageClasses()">
+  @if (config.showAvatars) {
+    <div class="message-avatar">
+      @if (message.sender.avatar) {
+        <img [src]="message.sender.avatar" [alt]="message.sender.name" />
+      } @else {
+        <div class="avatar-placeholder">
+          {{ getAvatarText() }}
+        </div>
+      }
+    </div>
+  }
+
+  <div class="message-content-wrapper">
+    <div class="message-header">
+      <span class="message-sender">{{ message.sender.name }}</span>
+      @if (config.showTimestamps) {
+        <span class="message-timestamp">
+          {{ message.timestamp | date: 'short' }}
+        </span>
+      }
+    </div>
+
+    <div class="message-content">
+      @if (!isEditing()) {
+        @if (message.type === 'code') {
+          <pre><code>{{ message.content }}</code></pre>
+        } @else if (message.type === 'markdown' && config.allowMarkdown) {
+          <div [innerHTML]="message.content"></div>
+        } @else {
+          <p>{{ message.content }}</p>
+        }
+      } @else {
+        <div class="edit-form">
+          <app-dynamic-form 
+            [config]="editFieldConfig" 
+            [form]="editForm"
+            (keydown.delete)="$event.stopPropagation()"
+            (keydown.backspace)="$event.stopPropagation()" (pointerdown)="$event.stopPropagation()"
+            (mousedown)="$event.stopPropagation()" (touchstart)="$event.stopPropagation()"
+          />
+        </div>
+      }
+    </div>
+
+    @if (isCurrentUser() && !isSystem()) {
+      <div class="message-actions">
+        @if (!isEditing()) {
+          <button
+            mat-icon-button
+            [matTooltip]="'chatTpl.edit' | translate"
+            (click)="startEdit()"
+            class="primary"
+            color="primary"
+          >
+            <mat-icon>edit</mat-icon>
+          </button>
+          <button
+            mat-icon-button
+            [matTooltip]="'chatTpl.delete' | translate"
+            (click)="onDelete()"
+            class="accent"
+            color="accent"
+          >
+            <mat-icon>delete</mat-icon>
+          </button>
+        } @else {
+          <button
+            mat-icon-button
+            [matTooltip]="'chatTpl.save' | translate"
+            (click)="saveEdit()"
+            class="success"
+            color="success"
+          >
+            <mat-icon>check</mat-icon>
+          </button>
+          <button
+            mat-icon-button
+            [matTooltip]="'chatTpl.cancel' | translate"
+            (click)="cancelEdit()"
+            class="neutral"
+            color="neutral"
+          >
+            <mat-icon>close</mat-icon>
+          </button>
+        }
+      </div>
+    }
+  </div>
+</div>

@@ -1,0 +1,520 @@
+import { Component, DoCheck, OnInit, inject, signal, computed } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { TranslateModule } from '@ngx-translate/core';
+import { DrawFlowBaseNode } from '@ng-draw-flow/core';
+
+import {
+  PaletteType,
+  RESERVED_KEYS,
+  ReservedKeys,
+  RunNodeDTO,
+  StripReservedShallow,
+} from '../../utils/workflow.interface';
+
+import { WfCanvasBus } from '../../utils/wf-canvas-bus';
+import { Observable } from 'rxjs';
+import { Store } from '@ngrx/store';
+import { AppSelectors } from '@cadai/pxs-ng-core/store';
+import { ChatComponent } from '@features/workflows/templates/components/chat/chat.component';
+import { ComparisonResult } from '@features/workflows/utils/compareTpl.interface';
+import { CompareComponent } from '@features/workflows/templates/components/compare/compare.component';
+import { SummaryResult } from '@features/workflows/utils/summarizeTpl.interface';
+import { SummarizeComponent } from '@features/workflows/templates/components/summarize/summarize.component';
+import { ChatMessage } from '@features/workflows/utils/chatTpl.interface';
+
+@Component({
+  selector: 'app-wf-preview-node',
+  standalone: true,
+  imports: [
+    CommonModule,
+    MatButtonModule,
+    MatIconModule,
+    MatTooltipModule,
+    TranslateModule,
+    ChatComponent,
+    CompareComponent,
+    SummarizeComponent
+  ],
+  styles: [`
+    :host { display:block; min-width:320px; max-width:760px; }
+    .card { 
+      border:2px solid var(--mat-primary,#fff); 
+      border-radius:12px; 
+      background:var(--md-sys-color-surface,#fff);
+      box-shadow:0 6px 24px rgba(0,0,0,.08); 
+      overflow:hidden; 
+      min-width:700px;
+      display: flex;
+      flex-direction: column;
+      height: 820px;
+      max-height: 820px;
+
+      &.collapsed {
+        height: auto;
+      }
+    }
+    .card.is-selected {
+      outline: 2px solid #42a5f5;
+      outline-offset: 5px;
+    }
+    .hdr { 
+      display:flex; 
+      align-items:center; 
+      gap:.5rem; 
+      padding:.5rem .75rem;
+      flex-shrink: 0;
+    }
+    .title { 
+      font-weight: 600;
+      color: var(--mat-primary, #fff); 
+      flex:1 1 auto; 
+      white-space:nowrap; 
+      overflow:hidden; 
+      text-overflow:ellipsis; 
+    }
+    .body { 
+      padding: 0;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+      overflow: hidden;
+    }
+    .body app-chat-tpl,
+    .body app-compare-tpl,
+    .body app-summarize-tpl {
+      min-height: 100%;
+      flex: 1;
+    }
+    .no-preview {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 48px;
+      text-align: center;
+      color: var(--mat-sys-on-surface-variant);
+      
+      mat-icon {
+        font-size: 64px;
+        width: 64px;
+        height: 64px;
+        margin-bottom: 16px;
+        opacity: 0.5;
+      }
+      
+      p {
+        margin: 0;
+        font-size: 14px;
+      }
+    }
+  `],
+  template: `
+    <div class="card" [ngClass]="{'collapsed': collapsed()}" (dblclick)="$event.stopPropagation()" [attr.data-node-id]="nodeId">
+      <div class="hdr">
+        <mat-icon [color]="(isDark$ | async) ? 'neutral' : 'success'">preview</mat-icon>
+        <div class="title">{{ "workflow.runPanel.preview" | translate }} : {{ computedTitle() | translate }}</div>
+
+        <button mat-icon-button (click)="fullscreen()" [matTooltip]="('jump_to_view' | translate) + ' : ' + (computedTitle() | translate)" [color]="(isDark$ | async) ? 'warn' : 'accent'">
+          <mat-icon>move_up</mat-icon>
+        </button>
+        <button mat-icon-button (click)="closePanel()" [matTooltip]="'close' | translate" [color]="(isDark$ | async) ? 'neutral' : 'primary'">
+          <mat-icon>close</mat-icon>
+        </button>
+        <button mat-icon-button (click)="collapsed.set(!collapsed())" [matTooltip]="(collapsed() ? 'untoggle' : 'toggle') | translate" [color]="(isDark$ | async) ? 'neutral' : 'primary'">
+          <mat-icon>{{ collapsed() ? 'expand_more' : 'expand_less' }}</mat-icon>
+        </button>
+      </div>
+
+      @if (!collapsed()) {
+        <div class="body">
+          @switch (currentComponentType()) {
+            @case ('chat') {
+              <app-chat-tpl
+                [mode]="{ mode: 'preloaded', messages: chatMessages() }"
+              />
+            }
+            @case ('compare') {
+              <app-compare-tpl
+                [mode]="{ mode: 'preloaded', result: comparisonResult() }"
+              />
+            }
+            @case ('summarize') {
+              <app-summarize-tpl
+                [mode]="{ mode: 'preloaded', result: summaryResult() }"
+              />
+            }
+            @default {
+              <div class="no-preview">
+                <mat-icon>info</mat-icon>
+                <p>{{ 'workflow.runPanel.noPreview' | translate }}</p>
+                <p>{{ 'workflow.runPanel.type' | translate }}: {{ dto()?.type || 'unknown' }}</p>
+              </div>
+            }
+          }
+        </div>
+      }
+    </div>
+  `
+})
+export class WfPreviewNodeComponent extends DrawFlowBaseNode implements OnInit, DoCheck {
+  private bus = inject(WfCanvasBus);
+  private store = inject(Store);
+
+  collapsed = signal<boolean>(false);
+  private lastModelRef: unknown = null;
+  private lastHashKey = '';
+
+  public isDark$!: Observable<boolean>;
+
+  /**
+   * Computed signal to determine which component to display
+   */
+  currentComponentType = computed(() => {
+    const currentDto = this.dto();
+    if (!currentDto) return null;
+
+    const type = currentDto.aiType || '';
+
+    switch (type.toLowerCase()) {
+      case 'chat':
+        return 'chat';
+      case 'compare':
+        return 'compare';
+      case 'summarize':
+        return 'summarize';
+      default:
+        return null;
+    }
+  });
+
+  /**
+   * Computed signal for chat messages
+   */
+chatMessages = computed(() => {
+  const currentDto = this.dto();
+  
+  // Try to get messages from DTO result
+  if (currentDto?.result) {
+    // Check if result is an array of chat messages
+    if (Array.isArray(currentDto.result) && this.isChatMessageArray(currentDto.result)) {
+      return currentDto.result;
+    }
+    
+    // Check if result has a messages property (alternative structure)
+    if (typeof currentDto.result === 'object' && 'messages' in currentDto.result) {
+      const messages = currentDto.result?.['messages'];
+      if (Array.isArray(messages) && this.isChatMessageArray(messages)) {
+        return messages;
+      }
+    }
+  }
+
+  // Return empty array - ChatComponent will handle welcome message
+  return this.getMockChatMessages();
+});
+
+  /**
+   * Computed signal for comparison result
+   */
+  comparisonResult = computed((): ComparisonResult => {
+    const currentDto = this.dto();
+    
+    if (currentDto?.result && this.isComparisonResult(currentDto.result)) {
+      return currentDto.result as ComparisonResult;
+    }
+
+    return this.getMockComparisonResult();
+  });
+
+  /**
+   * Computed signal for summary result
+   */
+  summaryResult = computed((): SummaryResult => {
+    const currentDto = this.dto();
+    
+    if (currentDto?.result && this.isSummaryResult(currentDto.result)) {
+      return currentDto.result as SummaryResult;
+    }
+
+    return this.getMockSummaryResult();
+  });
+
+  ngOnInit(): void {
+    this.lastModelRef = this.model;
+    this.lastHashKey = this.hashKey();
+    this.isDark$ = this.store.select(AppSelectors.ThemeSelectors.selectIsDark);
+  }
+
+  ngDoCheck(): void {
+    const ref = this.model;
+    const hk = this.hashKey();
+    if (ref !== this.lastModelRef || hk !== this.lastHashKey) {
+      this.markForCheck();
+      this.lastModelRef = ref;
+      this.lastHashKey = hk;
+    }
+  }
+
+  private coerceModel(raw: unknown): RunNodeDTO {
+    const data = (raw ?? {}) as RunNodeDTO;
+    const type = (data.type ?? data.aiType ?? 'input') as PaletteType;
+    const ports = data.ports;
+    return { 
+      type, 
+      ports, 
+      params: this.stripReserved(data.params), 
+      aiType: data.aiType, 
+      label: data.label, 
+      position: data?.['position'],
+      result: data?.result,
+      error: data?.error,
+      logs: data?.logs,
+      artifacts: data?.artifacts,
+      status: data?.status,
+    };
+  }
+
+  private get safeModel(): RunNodeDTO {
+    return this.coerceModel(this.model);
+  }
+
+  dto(): RunNodeDTO | undefined {
+    const raw = this.safeModel;
+    if (!raw) return undefined;
+
+    return {
+      id: raw?.id ?? '',
+      type: raw?.type ?? 'action',
+      aiType: raw?.aiType,
+      label: this.computedTitle(),
+      params: raw.params,
+      result: raw.result,
+      error: raw.error,
+      logs: raw.logs,
+      artifacts: raw.artifacts,
+      status: raw.status,
+    };
+  }
+
+  computedTitle(): string {
+    const raw = this.safeModel;
+    return raw?.label ?? (this.safeModel.type || '');
+  }
+
+  private hashKey(): string {
+    const m = this.safeModel ?? {};
+    return [
+      m, m?.['data'], m?.params, m?.result, m?.error, m?.logs, m?.artifacts,
+      m?.label, m?.type, m?.status
+    ].map(x => (x && typeof x === 'object') ? `@${Object.keys(x).length}` : String(x)).join('|');
+  }
+
+  private stripReserved<T>(obj: T): StripReservedShallow<T> {
+    if (obj === null || typeof obj !== 'object') {
+      return obj as StripReservedShallow<T>;
+    }
+    const RESERVED_SET: ReadonlySet<ReservedKeys> = new Set(RESERVED_KEYS);
+
+    const entries = Object
+      .entries(obj as Record<string, unknown>)
+      .filter(([k]) => !RESERVED_SET.has(k as ReservedKeys));
+
+    return Object.fromEntries(entries) as StripReservedShallow<T>;
+  }
+
+  closePanel(): void {
+    this.bus.togglePreviewPanel$.next({
+      toggleOff: true,
+    });
+  }
+
+  fullscreen(): void {
+    // Implement fullscreen logic
+  }
+
+  /**
+   * Type guards
+   */
+  private isChatMessageArray(arr: unknown[]): arr is ChatMessage[] {
+  if (!Array.isArray(arr) || arr.length === 0) {
+    return false;
+  }
+  
+  // Check if first item looks like a ChatMessage
+  const first = arr[0];
+  return (
+    typeof first === 'object' &&
+    first !== null &&
+    'id' in first &&
+    'content' in first &&
+    'sender' in first &&
+    'timestamp' in first
+  );
+}
+
+  private isComparisonResult(obj: unknown): obj is ComparisonResult {
+    return (
+      typeof obj === 'object' &&
+      obj !== null &&
+      'file1' in obj &&
+      'file2' in obj &&
+      'differences' in obj &&
+      'similarity' in obj
+    );
+  }
+
+  private isSummaryResult(obj: unknown): obj is SummaryResult {
+    return (
+      typeof obj === 'object' &&
+      obj !== null &&
+      'summary' in obj &&
+      'keyPoints' in obj &&
+      'wordCount' in obj
+    );
+  }
+
+  /**
+   * Mock data generators
+   */
+  private getMockComparisonResult(): ComparisonResult {
+    return {
+      id: 'comp-123',
+      file1: {
+        key: 'file-1-key',
+        name: 'contract_v1.pdf',
+        size: 2048576,
+        ext: 'pdf',
+        mime: 'application/pdf',
+        url: 'https://storage.example.com/files/contract_v1.pdf',
+        uploadDate: new Date('2025-01-15')
+      },
+      file2: {
+        key: 'file-2-key',
+        name: 'contract_v2.pdf',
+        size: 2156789,
+        ext: 'pdf',
+        mime: 'application/pdf',
+        url: 'https://storage.example.com/files/contract_v2.pdf',
+        uploadDate: new Date('2025-01-20')
+      },
+      differences: [
+        {
+          id: 'diff-1',
+          type: 'modified',
+          section: 'Section 3: Payment Terms',
+          file1Content: 'Payment due within 30 days',
+          file2Content: 'Payment due within 45 days',
+          lineNumber: 42,
+          description: 'Payment term duration changed from 30 to 45 days'
+        },
+        {
+          id: 'diff-2',
+          type: 'added',
+          section: 'Section 5: Confidentiality',
+          file2Content: 'All information shall remain confidential for 5 years',
+          lineNumber: 78,
+          description: 'New confidentiality clause added'
+        },
+        {
+          id: 'diff-3',
+          type: 'removed',
+          section: 'Section 2: Delivery Terms',
+          file1Content: 'Delivery within 14 business days',
+          lineNumber: 28,
+          description: 'Delivery terms section removed'
+        }
+      ],
+      similarity: 87.5,
+      status: 'completed',
+      createdAt: new Date('2025-01-20T10:30:00'),
+      completedAt: new Date('2025-01-20T10:30:45')
+    };
+  }
+
+  private getMockSummaryResult(): SummaryResult {
+    return {
+      id: 'summary-123',
+      files: [
+        {
+          key: 'file-1',
+          name: 'quarterly-report.pdf',
+          size: 2048576,
+          ext: 'pdf',
+          mime: 'application/pdf',
+          url: 'https://storage.example.com/files/report.pdf',
+          uploadDate: new Date('2025-10-15')
+        }
+      ],
+      summary: `This quarterly report highlights significant growth across all departments. 
+                Revenue increased by 25% compared to Q3. Key achievements include successful 
+                product launches and market expansion in European markets.`,
+      keyPoints: [
+        'Revenue increased by 25% quarter-over-quarter',
+        'Successful launch of 3 new products',
+        'Market expansion into 5 European countries',
+        'Customer satisfaction rating improved to 4.8/5',
+        'Operating costs reduced by 12%'
+      ],
+      wordCount: {
+        original: 5420,
+        summary: 456,
+        reduction: 91.6
+      },
+      style: 'executive',
+      length: 'medium',
+      language: 'en',
+      status: 'completed',
+      createdAt: new Date('2025-10-20T10:30:00'),
+      completedAt: new Date('2025-10-20T10:31:15')
+    };
+  }
+
+  private getMockChatMessages(): ChatMessage[] {
+  return [
+    {
+      id: 'msg-1',
+      content: 'Hello! I need help with document analysis.',
+      sender: {
+        id: 'user-1',
+        name: 'John Doe',
+        type: 'user',
+      },
+      timestamp: new Date('2025-11-03T10:00:00'),
+    },
+    {
+      id: 'msg-2',
+      content: 'Hello! I\'d be happy to help you with document analysis. What would you like to know?',
+      sender: {
+        id: 'assistant',
+        name: 'AI Assistant',
+        type: 'assistant',
+      },
+      timestamp: new Date('2025-11-03T10:00:15'),
+    },
+    {
+      id: 'msg-3',
+      content: 'Can you help me compare two contracts and identify the key differences?',
+      sender: {
+        id: 'user-1',
+        name: 'John Doe',
+        type: 'user',
+      },
+      timestamp: new Date('2025-11-03T10:01:00'),
+    },
+    {
+      id: 'msg-4',
+      content: 'Certainly! I can help you compare contracts. Please upload the two contract documents you\'d like to compare, and I\'ll identify the key differences for you.',
+      sender: {
+        id: 'assistant',
+        name: 'AI Assistant',
+        type: 'assistant',
+      },
+      timestamp: new Date('2025-11-03T10:01:20'),
+    },
+  ];
+}
+}

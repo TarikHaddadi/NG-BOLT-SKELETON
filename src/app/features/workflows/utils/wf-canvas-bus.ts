@@ -37,4 +37,9 @@ export class WfCanvasBus {
     title?: string;
     toggleOff?: boolean;
   }>();
+  togglePreviewPanel$ = new Subject<{
+    dto?: RunNodeDTO;
+    title?: string;
+    toggleOff?: boolean;
+  }>();
 }

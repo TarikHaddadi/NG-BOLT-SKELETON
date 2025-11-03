@@ -1,0 +1,74 @@
+<div class="chat-container">
+  <!-- Header -->
+  <div class="chat-header">
+    <div class="chat-header-info">
+      <mat-icon [color]="(isDark$ | async) ? 'accent' : 'primary'">chat</mat-icon>
+      <span class="chat-title">{{ 'chatTpl.title' | translate }}</span>
+    </div>
+    <div class="chat-header-actions">
+      <button
+        mat-icon-button
+        [matTooltip]="'chatTpl.scrollToBottom' | translate"
+        (click)="scrollToBottom()"
+        [disabled]="disabled"
+        class="success"
+      >
+        <mat-icon>arrow_downward</mat-icon>
+      </button>
+      <button
+        mat-icon-button
+        [matTooltip]="'chatTpl.clear' | translate"
+        (click)="clearChat()"
+        [disabled]="disabled || isEmpty()"
+        class="accent"
+      >
+        <mat-icon>delete_sweep</mat-icon>
+      </button>
+    </div>
+  </div>
+
+  <!-- Messages Area -->
+  <div 
+    #messagesContainer 
+    class="chat-messages" 
+    [attr.aria-label]="'chatTpl.messages' | translate"
+  >
+    @if (isEmpty() && !loading) {
+      <div class="chat-empty">
+        <mat-icon>chat_bubble_outline</mat-icon>
+        <p>{{ 'chatTpl.empty' | translate }}</p>
+      </div>
+    }
+
+    @for (message of messages$(); track trackByMessageId($index, message)) {
+      <app-chat-message-tpl
+        [message]="message"
+        [config]="config$()"
+        [currentUserId]="currentUser.id"
+        (delete)="onDeleteMessage($event)"
+        (edit)="onEditMessage($event.id, $event.content)"
+      />
+    }
+
+    @if (typing) {
+      <div class="chat-typing">
+        <div class="typing-indicator">
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
+        <span class="typing-text">{{ 'chatTpl.typing' | translate }}</span>
+      </div>
+    }
+  </div>
+
+  <!-- Input Area - Fixed at bottom -->
+  <div class="chat-footer">
+    <app-chat-input-tpl
+      [maxLength]="config$().maxLength || 4000"
+      [disabled]="disabled || loading"
+      [loading]="loading"
+      (send)="onSendMessage($event)"
+    />
+  </div>
+</div>
