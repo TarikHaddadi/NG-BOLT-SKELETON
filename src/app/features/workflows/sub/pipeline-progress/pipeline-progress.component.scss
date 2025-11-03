@@ -74,7 +74,7 @@
 }
 
 .stage-title {
-    font-size: 12px;
+    font-size: 1--2px;
     color: #607d8b;
     font-weight: 600;
 }
@@ -96,6 +96,7 @@
     border-radius: var(--node-radius);
     padding: 0 0 0 var(--node-pad-x);
     background: var(--c-bg);
+    overflow: hidden;
 }
 
 .node .emblem {

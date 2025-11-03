@@ -13,19 +13,19 @@ import {
   RunNodeDTO,
   WorkflowNodeDataBaseParams,
   WorkflowPorts,
-} from '../utils/workflow.interface';
+} from '../../utils/workflow.interface';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { FieldConfigService } from '@cadai/pxs-ng-core/services';
-import { WfCanvasBus } from '../utils/wf-canvas-bus';
-import { ActionFormSpec, makeFallback } from '../utils/action-forms';
+import { WfCanvasBus } from '../../utils/wf-canvas-bus';
+import { ActionFormSpec, makeFallback } from '../../utils/action-forms';
 import { debounceTime, distinctUntilChanged, Observable, startWith, Subscription } from 'rxjs';
 import { DynamicFormComponent } from '@cadai/pxs-ng-core/shared';
 import { FieldConfig } from '@cadai/pxs-ng-core/interfaces';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import type { ReplaceBinary, ReservedKeys, StripReservedShallow } from '../utils/workflow.interface';
+import type { ReplaceBinary, ReservedKeys, StripReservedShallow } from '../../utils/workflow.interface';
 import { Store } from '@ngrx/store';
 import { AppSelectors } from '@cadai/pxs-ng-core/store';
 import { CommonModule } from '@angular/common';
@@ -79,6 +79,7 @@ export class WfNodeComponent extends DrawFlowBaseNode implements OnDestroy, OnIn
   @Input({ required: true }) actionsNodes!: Record<string, ActionFormSpec>;
 
   public isDark$!: Observable<boolean>;
+  translate = inject(TranslateService);
   store = inject(Store);
 
 
@@ -164,31 +165,51 @@ export class WfNodeComponent extends DrawFlowBaseNode implements OnDestroy, OnIn
     });
   }
 
-  private wireFormToCanvas(form: FormGroup | null) {
-    if (!form) {
-      this.bus.nodeFormStatus$.next({ nodeId: this.nodeId, invalid: false });
-      return;
-    }
-    const emit = () => {
-      const invalid = form.invalid;
-      this.bus.nodeFormStatus$.next({
-        nodeId: this.nodeId,
-        invalid,
-        invalidFields: Object.entries(form.controls).filter(([, c]) => c.invalid && !c.value).map(([k]) => k),
-      });
-    };
-    emit();
-    this.subs.add(form.statusChanges.pipe(startWith(form.status)).subscribe(emit));
+private wireFormToCanvas(form: FormGroup | null) {
+  if (!form) {
+    this.bus.nodeFormStatus$.next({ nodeId: this.nodeId, invalid: false });
+    return;
   }
 
-  getInvalidFieldLabels(): string[] {
-    if (!this.form) return [];
-    const labelsByName = new Map(this.config.map(f => [f.name, f.label]));
+  const emit = () => {
+    const invalidFields = Object.entries(form.controls)
+      .filter(([, c]) => c.invalid)
+      .map(([name]) => name);
 
-    return Object.entries(this.form.controls)
-      .filter(([, c]) => { return !c.valid })
-      .map(([name]) => labelsByName.get(name) ?? name);
-  }
+    this.bus.nodeFormStatus$.next({
+      nodeId: this.nodeId,
+      invalid: form.invalid,
+      invalidFields, 
+    });
+  };
+
+  emit();
+  this.subs.add(form.statusChanges.pipe(startWith(form.status)).subscribe(emit));
+}
+
+    private currentForm(): FormGroup {
+  return this.visualType() === 'input' ? this.formInputs : this.form;
+}
+private currentConfig(): FieldConfig[] {
+  return this.visualType() === 'input' ? this.configInputs : this.config;
+}
+
+hasInvalidParams(): boolean {
+  const f = this.currentForm();
+  return this.formFlags.invalid || (!!f && f.invalid);
+}
+
+getInvalidFieldLabels(): string[] {
+  const form = this.currentForm();
+  if (!form) return [];
+
+  const cfg = this.currentConfig();
+  const labelsByName = new Map(cfg.map(f => [f.name, f.label]));
+
+  return Object.entries(form.controls)
+    .filter(([, c]) => c.invalid) 
+    .map(([name]) => this.translate.instant(labelsByName.get(name) ?? name));
+}
 
   private coerceModel(raw: unknown): RunNodeDTO {
     const data = (raw ?? {}) as RunNodeDTO;
@@ -257,7 +278,9 @@ export class WfNodeComponent extends DrawFlowBaseNode implements OnDestroy, OnIn
           multiple: true,
           accept: '.pdf,.docx,image/*',
           required: false,
-          validators: undefined
+          fileVariant: 'dropzone',
+          validators: undefined,
+          errorMessages: {required: "files are mandatory"}
         }),
         this.fields.getDropdownField({
           name: 'workflows',
@@ -389,10 +412,6 @@ export class WfNodeComponent extends DrawFlowBaseNode implements OnDestroy, OnIn
     this.bus.nodeParamsChanged$.next({ nodeId: this.nodeId, params: {} });
 
     this.markForCheck();
-  }
-
-  hasInvalidParams(): boolean {
-    return this.formFlags.invalid;
   }
 
   private resolveActionKey(): string {
