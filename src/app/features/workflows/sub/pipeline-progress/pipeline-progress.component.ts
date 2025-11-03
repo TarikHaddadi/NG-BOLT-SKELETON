@@ -5,8 +5,8 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatButtonModule } from '@angular/material/button';
 import { TranslateModule } from '@ngx-translate/core';
 import { MatMenuModule } from '@angular/material/menu';
-import { PipelineWorkflowDTO, PreferredTab, StageNode, Status, WorkflowNode } from '../utils/workflow.interface';
-import { WfCanvasBus } from '../utils/wf-canvas-bus';
+import { PipelineWorkflowDTO, PreferredTab, StageNode, Status, WorkflowNode } from '../../utils/workflow.interface';
+import { WfCanvasBus } from '../../utils/wf-canvas-bus';
 import {  DrawFlowBaseNode } from '@ng-draw-flow/core';
 
 @Component({
@@ -138,6 +138,19 @@ export class PipelineProgressComponent extends DrawFlowBaseNode {
       title: node.data?.label,
       toggleOff: false,
       preferredTab: preferredtab
+    });
+  }
+
+  previewNode(n: StageNode) {
+    const wf = this._wf(); if (!wf) return;
+    const node = wf.nodes.find(x => x.id === n.id);
+
+    if (!node) return;
+    
+    this.canvasBus.togglePreviewPanel$.next({
+      dto: node.data,
+      title: node.data?.label,
+      toggleOff: false,
     });
   }
 

@@ -15,9 +15,9 @@ import {
   ReservedKeys,
   RunNodeDTO,
   StripReservedShallow,
-} from '../utils/workflow.interface';
+} from '../../utils/workflow.interface';
 
-import { WfCanvasBus } from '../utils/wf-canvas-bus';
+import { WfCanvasBus } from '../../utils/wf-canvas-bus';
 import { Observable } from 'rxjs';
 import { Store } from '@ngrx/store';
 import { AppSelectors } from '@cadai/pxs-ng-core/store';
@@ -53,8 +53,8 @@ import { AppSelectors } from '@cadai/pxs-ng-core/store';
   template: `
     <div class="card" (dblclick)="$event.stopPropagation()" [attr.data-node-id]="nodeId">
       <div class="hdr">
-        <mat-icon [color]="(isDark$ |async) ?'neutral': 'success' ">visibility</mat-icon>
-        <div class="title"> {{"workflow.runPanel.results" | translate}} : {{ computedTitle() | translate }}</div>
+        <mat-icon [color]="(isDark$ |async) ?'neutral': 'success' ">details</mat-icon>
+        <div class="title"> {{"workflow.runPanel.details" | translate}} : {{ computedTitle() | translate }}</div>
 
         <button mat-icon-button (click)="closePanel()" [matTooltip]="'close' | translate"  [color]="(isDark$ |async) ?'neutral': 'primary' ">
           <mat-icon>{{'close'}}</mat-icon>
