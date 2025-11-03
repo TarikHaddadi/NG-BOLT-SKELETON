@@ -4,36 +4,36 @@ import {
   Input,
   Output,
   EventEmitter,
-  signal,
-  computed,
-  effect,
-  inject,
   OnInit,
   OnDestroy,
   ViewChild,
   ElementRef,
+  signal,
+  computed,
+  effect,
+  inject,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule } from '@angular/forms';
+import { Store } from '@ngrx/store';
+import { Observable, Subject, takeUntil } from 'rxjs';
+import { TranslateModule } from '@ngx-translate/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { TranslateModule } from '@ngx-translate/core';
-import { Store } from '@ngrx/store';
-import { Observable, Subject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
-import { AppSelectors } from '@cadai/pxs-ng-core/store';
+
+import { ChatService } from '../../services/chat.service';
+import { ChatInputComponent } from './chatInput/chatInput.component';
+import { ChatMessageComponent } from './chatMessage/chatMessage.component';
 import {
   ChatMessage,
   ChatSender,
-  ChatConfig,
   ChatMode,
+  ChatConfig,
   ChatEndpoints,
 } from '../../../utils/chatTpl.interface';
-import { ChatMessageComponent } from './chatMessage/chatMessage.component';
-import { ChatInputComponent } from './chatInput/chatInput.component';
-import { ChatService } from '../../services/chat.service';
+import { AppSelectors } from '@cadai/pxs-ng-core/store';
 
 @Component({
   selector: 'app-chat-tpl',
@@ -70,12 +70,14 @@ export class ChatComponent implements OnInit, OnDestroy {
 
   @Input() set config(value: Partial<ChatConfig>) {
     this._config.set({ ...this.defaultConfig, ...value });
+    // Update service configuration when config changes
+    this.updateServiceConfig();
   }
 
   @Input() set currentUser(value: ChatSender) {
     this._currentUser.set(value);
   }
-  
+
   get currentUser() {
     return this._currentUser();
   }
@@ -88,12 +90,12 @@ export class ChatComponent implements OnInit, OnDestroy {
 
   @Input() set endpoints(value: Partial<ChatEndpoints>) {
     this._endpoints.set(value);
+    this.updateServiceConfig();
   }
 
   @Input() disabled = false;
   @Input() loading = false;
   @Input() typing = false;
-  @Input() useMockData = true;
 
   // Outputs
   @Output() messageSent = new EventEmitter<string>();
@@ -101,6 +103,7 @@ export class ChatComponent implements OnInit, OnDestroy {
   @Output() messageEdited = new EventEmitter<{ id: string; content: string }>();
   @Output() chatCleared = new EventEmitter<void>();
   @Output() errorEmitter = new EventEmitter<Error>();
+  @Output() attachmentUploaded = new EventEmitter<{ url: string; filename: string }>();
 
   // Signals
   private _mode = signal<ChatMode>({ mode: 'interactive' });
@@ -122,6 +125,24 @@ export class ChatComponent implements OnInit, OnDestroy {
 
   isPreloadedMode$ = computed(() => this._mode().mode === 'preloaded');
 
+  // Use maxLength OR maxMessageLength (maxLength takes priority)
+  effectiveMaxLength$ = computed(() => {
+    const config = this._config();
+    return config.maxLength ?? config.maxMessageLength ?? 4000;
+  });
+
+  // Use config placeholder or default
+  effectivePlaceholder$ = computed(() => {
+    const config = this._config();
+    return config.placeholder ?? 'chatTpl.placeholder';
+  });
+
+  // Use config empty message or default
+  effectiveEmptyMessage$ = computed(() => {
+    const config = this._config();
+    return config.emptyStateMessage ?? 'chatTpl.empty';
+  });
+
   canSendMessage$ = computed(() => {
     const isLoading = this._isLoading();
     const isTyping = this._isTyping();
@@ -140,7 +161,6 @@ export class ChatComponent implements OnInit, OnDestroy {
 
     return true;
   });
-
 
   isDark$!: Observable<boolean>;
   lang$!: Observable<string>;
@@ -169,6 +189,7 @@ export class ChatComponent implements OnInit, OnDestroy {
   }
 
   constructor() {
+    // Auto-scroll effect
     effect(() => {
       const messages = this._messages();
       const config = this._config();
@@ -178,10 +199,12 @@ export class ChatComponent implements OnInit, OnDestroy {
       }
     });
 
+    // Sync typing state
     effect(() => {
       this.typing = this._isTyping();
     });
 
+    // Sync loading state
     effect(() => {
       this.loading = this._isLoading();
     });
@@ -191,16 +214,8 @@ export class ChatComponent implements OnInit, OnDestroy {
     this.isDark$ = this.store.select(AppSelectors.ThemeSelectors.selectIsDark);
     this.lang$ = this.store.select(AppSelectors.LangSelectors.selectLang);
 
-    // Configure service
-    this.chatService.configure({
-      useMockData: this.useMockData,
-      endpoints: this._endpoints(),
-    });
-
-    // Initialize with welcome message if empty and in interactive mode
-    if (this._messages().length === 0 && this._mode().mode === 'interactive') {
-      this.addWelcomeMessage();
-    }
+    // Configure service with initial config
+    this.updateServiceConfig();
   }
 
   ngOnDestroy(): void {
@@ -208,13 +223,21 @@ export class ChatComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
+  private updateServiceConfig(): void {
+    this.chatService.configure({
+      endpoints: this._endpoints(),
+      config: this._config(),
+    });
+  }
+
   isEmpty(): boolean {
     return this._messages().length === 0;
   }
 
-  /**
-   * Send message using service
-   */
+  trackByMessageId(index: number, message: ChatMessage): string {
+    return message.id;
+  }
+
   onSendMessage(content: string): void {
     if (!this.canSendMessage$()) {
       return;
@@ -227,27 +250,26 @@ export class ChatComponent implements OnInit, OnDestroy {
       timestamp: new Date(),
     };
 
-    // Add user message immediately
     this._messages.update(msgs => [...msgs, userMessage]);
     this.messageSent.emit(content);
-
-    // Set typing indicator
     this._isTyping.set(true);
 
-    // Call service to send message
+    const endpoints = {
+      ...this._endpoints(),
+    };
+
     this.chatService
       .sendMessage(
         {
           content,
           sender: this._currentUser(),
         },
-        this._endpoints()
+        endpoints
       )
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: response => {
           this._isTyping.set(false);
-          // Add assistant response
           this._messages.update(msgs => [...msgs, response.assistantMessage]);
         },
         error: err => {
@@ -258,53 +280,93 @@ export class ChatComponent implements OnInit, OnDestroy {
       });
   }
 
-  /**
-   * Delete message using service
-   */
   onDeleteMessage(messageId: string): void {
     if (!this.canEditDelete$()) {
-      console.warn('Message deletion is disabled in current mode');
       return;
     }
+
+    this._isLoading.set(true);
 
     this.chatService
       .deleteMessage(messageId, this._endpoints())
       .pipe(takeUntil(this.destroy$))
       .subscribe({
-        next: response => {
-          if (response.success) {
-            this._messages.update(msgs => msgs.filter(m => m.id !== messageId));
-            this.messageDeleted.emit(messageId);
-          }
+        next: () => {
+          this._isLoading.set(false);
+          this._messages.update(msgs => msgs.filter(m => m.id !== messageId));
+          this.messageDeleted.emit(messageId);
         },
         error: err => {
+          this._isLoading.set(false);
           console.error('Error deleting message:', err);
           this.errorEmitter.emit(err);
         },
       });
   }
 
-  /**
-   * Edit message using service
-   */
-  onEditMessage(id: string, content: string): void {
-    if (!this.canEditDelete$()) {
-      console.warn('Message editing is disabled in current mode');
+onEditMessage(messageId: string, content: string): void {
+  if (!this.canEditDelete$()) {
+    return;
+  }
+
+  this._isLoading.set(true);
+
+  this.chatService
+    .editMessage(messageId, content, this._endpoints())
+    .pipe(takeUntil(this.destroy$))
+    .subscribe({
+      next: updated => {
+        this._isLoading.set(false);
+        this._messages.update(msgs =>
+          msgs.map(m =>
+            m.id === messageId
+              ? { ...m, content, edited: true, ...updated }
+              : m
+          )
+        );
+        this.messageEdited.emit({ id: messageId, content });
+      },
+      error: err => {
+        this._isLoading.set(false);
+        console.error('Error editing message:', err);
+        this.errorEmitter.emit(err);
+      },
+    });
+}
+
+  onAttachmentSelected(file: File): void {
+    const config = this._config();
+    if (!config.enableAttachments) {
       return;
     }
 
+    this._isLoading.set(true);
+
+    const endpoints = {
+      ...this._endpoints(),
+    };
+
     this.chatService
-      .editMessage(id, content, this._endpoints())
+      .uploadAttachment(file, endpoints)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
-        next: updatedMessage => {
-          this._messages.update(msgs =>
-            msgs.map(m => (m.id === id ? { ...m, ...updatedMessage, edited: true } : m))
-          );
-          this.messageEdited.emit({ id, content });
+        next: result => {
+          this._isLoading.set(false);
+          this.attachmentUploaded.emit(result);
+          
+          // Optionally add attachment info as message
+          const attachmentMessage: ChatMessage = {
+            id: this.generateMessageId(),
+            content: `Uploaded: ${result.filename}`,
+            sender: this._currentUser(),
+            timestamp: new Date(),
+            metadata: { attachmentUrl: result.url },
+          };
+          this._messages.update(msgs => [...msgs, attachmentMessage]);
         },
         error: err => {
-          console.error('Error editing message:', err);
+          this._isLoading.set(false);
+          console.error('Error uploading attachment:', err);
           this.errorEmitter.emit(err);
         },
       });
@@ -313,39 +375,6 @@ export class ChatComponent implements OnInit, OnDestroy {
   clearChat(): void {
     this._messages.set([]);
     this.chatCleared.emit();
-
-    if (this._mode().mode === 'interactive') {
-      this.addWelcomeMessage();
-    }
-  }
-
-  addMessage(message: Omit<ChatMessage, 'id' | 'timestamp'>): void {
-    const newMessage: ChatMessage = {
-      ...message,
-      id: this.generateMessageId(),
-      timestamp: new Date(),
-    };
-
-    this._messages.update(msgs => [...msgs, newMessage]);
-  }
-
-  private addWelcomeMessage(): void {
-    const welcomeMessage: ChatMessage = {
-      id: this.generateMessageId(),
-      content: 'Hello! How can I help you today?',
-      sender: {
-        id: 'assistant',
-        name: 'Assistant',
-        type: 'assistant',
-      },
-      timestamp: new Date(),
-    };
-
-    this._messages.set([welcomeMessage]);
-  }
-
-  private generateMessageId(): string {
-    return `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
   }
 
   scrollToBottom(): void {
@@ -355,7 +384,8 @@ export class ChatComponent implements OnInit, OnDestroy {
     }
   }
 
-  trackByMessageId(index: number, message: ChatMessage): string {
-    return message.id;
+  
+  private generateMessageId(): string {
+    return `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
   }
 }

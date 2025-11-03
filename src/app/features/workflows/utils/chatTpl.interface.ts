@@ -6,6 +6,7 @@ export interface ChatMessage {
   type?: 'text' | 'markdown' | 'code';
   avatar?: string;
   metadata?: Record<string, unknown>;
+  edited?: boolean;
 }
 
 export interface ChatSender {
@@ -34,10 +35,6 @@ export interface ChatConfig {
   // UI Messages
   emptyStateMessage?: string;
   
-  // API Endpoints
-  sendEndpoint?: string;
-  uploadEndpoint?: string;
-  
   // Advanced Options
   maxMessageLength?: number;
 }
@@ -54,6 +51,7 @@ export interface ChatEndpoints {
   deleteMessage: string;
   editMessage: string;
   clearChat: string;
+  uploadAttachment: string;
 }
 
 export interface ChatSendRequest {

@@ -1,6 +1,9 @@
 <div class="chat-input-container">
   <div class="chat-input-form" (keydown)="onKeyDown($event)" tabindex="0" role="region"
     aria-label="Chat input container">
+    @if (enableAttachments) {
+      <!-- COMPLETE UPLOAD FILE -->
+    }
     <app-dynamic-form [config]="fieldConfig" [form]="form" (keydown.delete)="$event.stopPropagation()"
       (keydown.backspace)="$event.stopPropagation()" (pointerdown)="$event.stopPropagation()"
       (mousedown)="$event.stopPropagation()" (touchstart)="$event.stopPropagation()" />
@@ -16,4 +19,10 @@
       }
     </button>
   </div>
+
+  @if (isOverLimit()) {
+  <div class="character-limit-warning">
+    {{ 'form.errors.textarea.maxlength' | translate: { requiredLength: maxLength } }}
+  </div>
+  }
 </div>

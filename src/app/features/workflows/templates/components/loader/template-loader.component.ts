@@ -263,15 +263,11 @@ export class TemplateLoaderComponent implements OnInit, AfterViewInit, OnDestroy
       instance.currentUser = config.currentUser;
     }
 
-    // ✅ NEW: Set endpoints
+    // Set endpoints
     if (config.endpoints) {
       instance.endpoints = config.endpoints;
     }
 
-    // ✅ NEW: Set useMockData flag
-    if (config.useMockData !== undefined) {
-      instance.useMockData = config.useMockData;
-    }
 
     // Wire outputs to forward events
     instance.messageSent.subscribe((content: string) => {
@@ -315,15 +311,11 @@ export class TemplateLoaderComponent implements OnInit, AfterViewInit, OnDestroy
       instance.config = config.config as CompareConfig || {};
     }
 
-    // ✅ NEW: Set endpoints
+    // Set endpoints
     if (config.endpoints) {
       instance.endpoints = config.endpoints;
     }
 
-    // ✅ NEW: Set useMockData flag
-    if (config.useMockData !== undefined) {
-      instance.useMockData = config.useMockData;
-    }
 
     // Wire outputs
     instance.comparisonCompleted.subscribe((result) => {
@@ -371,11 +363,6 @@ export class TemplateLoaderComponent implements OnInit, AfterViewInit, OnDestroy
     // Set endpoints
     if (config.endpoints) {
       instance.endpoints = config.endpoints;
-    }
-
-    //  Set useMockData flag
-    if (config.useMockData !== undefined) {
-      instance.useMockData = config.useMockData;
     }
 
     // Wire outputs

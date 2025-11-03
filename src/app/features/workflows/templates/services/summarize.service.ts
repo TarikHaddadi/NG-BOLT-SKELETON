@@ -2,13 +2,13 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, of, delay, throwError } from 'rxjs';
 import { catchError, tap } from 'rxjs/operators';
-import { 
-  SummaryResult, 
-  SummarizeFile, 
-  SummarizeEndpoints, 
-  SummarizeUploadRequest, 
-  SummarizeStartRequest, 
-  SummarizeUploadResponse, 
+import {
+  SummaryResult,
+  SummarizeFile,
+  SummarizeEndpoints,
+  SummarizeUploadRequest,
+  SummarizeStartRequest,
+  SummarizeUploadResponse,
   SummarizeStatusResponse,
   SummaryStyle,
   SummaryLength
@@ -28,12 +28,8 @@ export class SummarizeService {
     exportSummary: '/api/summarize/export',
   };
 
-  private useMockData = true;
 
-  configure(config: { useMockData?: boolean; endpoints?: Partial<SummarizeEndpoints> }): void {
-    if (config.useMockData !== undefined) {
-      this.useMockData = config.useMockData;
-    }
+  configure(config: { endpoints?: Partial<SummarizeEndpoints> }): void {
     if (config.endpoints) {
       this.defaultEndpoints = { ...this.defaultEndpoints, ...config.endpoints };
     }
@@ -48,9 +44,6 @@ export class SummarizeService {
   ): Observable<SummarizeUploadResponse> {
     const url = endpoints?.uploadFile || this.defaultEndpoints.uploadFile;
 
-    if (this.useMockData) {
-      return this.mockUploadFile(request);
-    }
 
     const formData = new FormData();
     request.files.forEach((file, index) => {
@@ -64,7 +57,9 @@ export class SummarizeService {
       tap(response => console.log('Files uploaded:', response)),
       catchError(error => {
         console.error('Error uploading files:', error);
-        return throwError(() => error);
+        throwError(() => error);
+        return this.mockUploadFile(request);
+
       })
     );
   }
@@ -78,9 +73,6 @@ export class SummarizeService {
   ): Observable<SummarizeStatusResponse> {
     const url = endpoints?.startSummarization || this.defaultEndpoints.startSummarization;
 
-    if (this.useMockData) {
-      return this.mockStartSummarization(request);
-    }
 
     const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
 
@@ -88,7 +80,9 @@ export class SummarizeService {
       tap(response => console.log('Summarization started:', response)),
       catchError(error => {
         console.error('Error starting summarization:', error);
-        return throwError(() => error);
+        throwError(() => error);
+        return this.mockStartSummarization(request);
+
       })
     );
   }
@@ -102,15 +96,14 @@ export class SummarizeService {
   ): Observable<SummaryResult> {
     const url = `${endpoints?.getSummary || this.defaultEndpoints.getSummary}/${summaryId}`;
 
-    if (this.useMockData) {
-      return this.mockGetSummary(summaryId);
-    }
 
     return this.http.get<SummaryResult>(url).pipe(
       tap(response => console.log('Summary result:', response)),
       catchError(error => {
         console.error('Error getting summary:', error);
-        return throwError(() => error);
+        throwError(() => error);
+        return this.mockGetSummary(summaryId);
+
       })
     );
   }
@@ -124,15 +117,14 @@ export class SummarizeService {
   ): Observable<{ success: boolean; summaryId: string }> {
     const url = `${endpoints?.cancelSummary || this.defaultEndpoints.cancelSummary}/${summaryId}`;
 
-    if (this.useMockData) {
-      return this.mockCancelSummary(summaryId);
-    }
 
     return this.http.delete<{ success: boolean; summaryId: string }>(url).pipe(
       tap(response => console.log('Summarization cancelled:', response)),
       catchError(error => {
         console.error('Error cancelling summarization:', error);
-        return throwError(() => error);
+        throwError(() => error);
+        return this.mockCancelSummary(summaryId);
+
       })
     );
   }
@@ -147,9 +139,6 @@ export class SummarizeService {
   ): Observable<Blob> {
     const url = `${endpoints?.exportSummary || this.defaultEndpoints.exportSummary}/${summaryId}`;
 
-    if (this.useMockData) {
-      return this.mockExportSummary(summaryId, format);
-    }
 
     return this.http
       .post(url, { format }, { responseType: 'blob' })
@@ -157,7 +146,9 @@ export class SummarizeService {
         tap(() => console.log('Summary exported')),
         catchError(error => {
           console.error('Error exporting summary:', error);
-          return throwError(() => error);
+          throwError(() => error);
+          return this.mockExportSummary(summaryId, format);
+
         })
       );
   }

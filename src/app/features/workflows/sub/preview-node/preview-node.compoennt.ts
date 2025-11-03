@@ -24,6 +24,7 @@ import { CompareComponent } from '@features/workflows/templates/components/compa
 import { SummaryResult } from '@features/workflows/utils/summarizeTpl.interface';
 import { SummarizeComponent } from '@features/workflows/templates/components/summarize/summarize.component';
 import { ChatMessage } from '@features/workflows/utils/chatTpl.interface';
+import { TemplatingService } from '@features/workflows/templates/services/templating.service';
 
 @Component({
   selector: 'app-wf-preview-node',
@@ -163,6 +164,7 @@ import { ChatMessage } from '@features/workflows/utils/chatTpl.interface';
 export class WfPreviewNodeComponent extends DrawFlowBaseNode implements OnInit, DoCheck {
   private bus = inject(WfCanvasBus);
   private store = inject(Store);
+  private templatingService = inject(TemplatingService);
 
   collapsed = signal<boolean>(false);
   private lastModelRef: unknown = null;
@@ -194,40 +196,39 @@ export class WfPreviewNodeComponent extends DrawFlowBaseNode implements OnInit, 
   /**
    * Computed signal for chat messages
    */
-chatMessages = computed(() => {
-  const currentDto = this.dto();
-  
-  // Try to get messages from DTO result
-  if (currentDto?.result) {
-    // Check if result is an array of chat messages
-    if (Array.isArray(currentDto.result) && this.isChatMessageArray(currentDto.result)) {
-      return currentDto.result;
-    }
-    
-    // Check if result has a messages property (alternative structure)
-    if (typeof currentDto.result === 'object' && 'messages' in currentDto.result) {
-      const messages = currentDto.result?.['messages'];
-      if (Array.isArray(messages) && this.isChatMessageArray(messages)) {
-        return messages;
+  chatMessages = computed(() => {
+    const currentDto = this.dto();
+
+    // Try to get messages from DTO result
+    if (currentDto?.result) {
+      // Check if result is an array of chat messages
+      if (Array.isArray(currentDto.result) && this.isChatMessageArray(currentDto.result)) {
+        return currentDto.result;
+      }
+
+      // Check if result has a messages property (alternative structure)
+      if (typeof currentDto.result === 'object' && 'messages' in currentDto.result) {
+        const messages = currentDto.result?.['messages'];
+        if (Array.isArray(messages) && this.isChatMessageArray(messages)) {
+          return messages;
+        }
       }
     }
-  }
 
-  // Return empty array - ChatComponent will handle welcome message
-  return this.getMockChatMessages();
-});
+    return this.templatingService.getMockChatMessages();
+  });
 
   /**
    * Computed signal for comparison result
    */
   comparisonResult = computed((): ComparisonResult => {
     const currentDto = this.dto();
-    
+
     if (currentDto?.result && this.isComparisonResult(currentDto.result)) {
       return currentDto.result as ComparisonResult;
     }
 
-    return this.getMockComparisonResult();
+    return this.templatingService.getMockComparisonResult();
   });
 
   /**
@@ -235,12 +236,12 @@ chatMessages = computed(() => {
    */
   summaryResult = computed((): SummaryResult => {
     const currentDto = this.dto();
-    
+
     if (currentDto?.result && this.isSummaryResult(currentDto.result)) {
       return currentDto.result as SummaryResult;
     }
 
-    return this.getMockSummaryResult();
+    return this.templatingService.getMockSummaryResult();
   });
 
   ngOnInit(): void {
@@ -263,12 +264,12 @@ chatMessages = computed(() => {
     const data = (raw ?? {}) as RunNodeDTO;
     const type = (data.type ?? data.aiType ?? 'input') as PaletteType;
     const ports = data.ports;
-    return { 
-      type, 
-      ports, 
-      params: this.stripReserved(data.params), 
-      aiType: data.aiType, 
-      label: data.label, 
+    return {
+      type,
+      ports,
+      params: this.stripReserved(data.params),
+      aiType: data.aiType,
+      label: data.label,
       position: data?.['position'],
       result: data?.result,
       error: data?.error,
@@ -340,21 +341,21 @@ chatMessages = computed(() => {
    * Type guards
    */
   private isChatMessageArray(arr: unknown[]): arr is ChatMessage[] {
-  if (!Array.isArray(arr) || arr.length === 0) {
-    return false;
+    if (!Array.isArray(arr) || arr.length === 0) {
+      return false;
+    }
+
+    // Check if first item looks like a ChatMessage
+    const first = arr[0];
+    return (
+      typeof first === 'object' &&
+      first !== null &&
+      'id' in first &&
+      'content' in first &&
+      'sender' in first &&
+      'timestamp' in first
+    );
   }
-  
-  // Check if first item looks like a ChatMessage
-  const first = arr[0];
-  return (
-    typeof first === 'object' &&
-    first !== null &&
-    'id' in first &&
-    'content' in first &&
-    'sender' in first &&
-    'timestamp' in first
-  );
-}
 
   private isComparisonResult(obj: unknown): obj is ComparisonResult {
     return (
@@ -377,144 +378,4 @@ chatMessages = computed(() => {
     );
   }
 
-  /**
-   * Mock data generators
-   */
-  private getMockComparisonResult(): ComparisonResult {
-    return {
-      id: 'comp-123',
-      file1: {
-        key: 'file-1-key',
-        name: 'contract_v1.pdf',
-        size: 2048576,
-        ext: 'pdf',
-        mime: 'application/pdf',
-        url: 'https://storage.example.com/files/contract_v1.pdf',
-        uploadDate: new Date('2025-01-15')
-      },
-      file2: {
-        key: 'file-2-key',
-        name: 'contract_v2.pdf',
-        size: 2156789,
-        ext: 'pdf',
-        mime: 'application/pdf',
-        url: 'https://storage.example.com/files/contract_v2.pdf',
-        uploadDate: new Date('2025-01-20')
-      },
-      differences: [
-        {
-          id: 'diff-1',
-          type: 'modified',
-          section: 'Section 3: Payment Terms',
-          file1Content: 'Payment due within 30 days',
-          file2Content: 'Payment due within 45 days',
-          lineNumber: 42,
-          description: 'Payment term duration changed from 30 to 45 days'
-        },
-        {
-          id: 'diff-2',
-          type: 'added',
-          section: 'Section 5: Confidentiality',
-          file2Content: 'All information shall remain confidential for 5 years',
-          lineNumber: 78,
-          description: 'New confidentiality clause added'
-        },
-        {
-          id: 'diff-3',
-          type: 'removed',
-          section: 'Section 2: Delivery Terms',
-          file1Content: 'Delivery within 14 business days',
-          lineNumber: 28,
-          description: 'Delivery terms section removed'
-        }
-      ],
-      similarity: 87.5,
-      status: 'completed',
-      createdAt: new Date('2025-01-20T10:30:00'),
-      completedAt: new Date('2025-01-20T10:30:45')
-    };
-  }
-
-  private getMockSummaryResult(): SummaryResult {
-    return {
-      id: 'summary-123',
-      files: [
-        {
-          key: 'file-1',
-          name: 'quarterly-report.pdf',
-          size: 2048576,
-          ext: 'pdf',
-          mime: 'application/pdf',
-          url: 'https://storage.example.com/files/report.pdf',
-          uploadDate: new Date('2025-10-15')
-        }
-      ],
-      summary: `This quarterly report highlights significant growth across all departments. 
-                Revenue increased by 25% compared to Q3. Key achievements include successful 
-                product launches and market expansion in European markets.`,
-      keyPoints: [
-        'Revenue increased by 25% quarter-over-quarter',
-        'Successful launch of 3 new products',
-        'Market expansion into 5 European countries',
-        'Customer satisfaction rating improved to 4.8/5',
-        'Operating costs reduced by 12%'
-      ],
-      wordCount: {
-        original: 5420,
-        summary: 456,
-        reduction: 91.6
-      },
-      style: 'executive',
-      length: 'medium',
-      language: 'en',
-      status: 'completed',
-      createdAt: new Date('2025-10-20T10:30:00'),
-      completedAt: new Date('2025-10-20T10:31:15')
-    };
-  }
-
-  private getMockChatMessages(): ChatMessage[] {
-  return [
-    {
-      id: 'msg-1',
-      content: 'Hello! I need help with document analysis.',
-      sender: {
-        id: 'user-1',
-        name: 'John Doe',
-        type: 'user',
-      },
-      timestamp: new Date('2025-11-03T10:00:00'),
-    },
-    {
-      id: 'msg-2',
-      content: 'Hello! I\'d be happy to help you with document analysis. What would you like to know?',
-      sender: {
-        id: 'assistant',
-        name: 'AI Assistant',
-        type: 'assistant',
-      },
-      timestamp: new Date('2025-11-03T10:00:15'),
-    },
-    {
-      id: 'msg-3',
-      content: 'Can you help me compare two contracts and identify the key differences?',
-      sender: {
-        id: 'user-1',
-        name: 'John Doe',
-        type: 'user',
-      },
-      timestamp: new Date('2025-11-03T10:01:00'),
-    },
-    {
-      id: 'msg-4',
-      content: 'Certainly! I can help you compare contracts. Please upload the two contract documents you\'d like to compare, and I\'ll identify the key differences for you.',
-      sender: {
-        id: 'assistant',
-        name: 'AI Assistant',
-        type: 'assistant',
-      },
-      timestamp: new Date('2025-11-03T10:01:20'),
-    },
-  ];
-}
 }

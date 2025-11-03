@@ -104,7 +104,6 @@ export class CompareComponent implements OnInit, OnDestroy {
   }
 
   @Input() disabled = false;
-  @Input() useMockData = true;
 
   // Outputs
   @Output() fileUploaded = new EventEmitter<{ slot: 1 | 2; file: CompareFile }>();
@@ -223,7 +222,6 @@ export class CompareComponent implements OnInit, OnDestroy {
 
     // Configure service
     this.compareService.configure({
-      useMockData: this.useMockData,
       endpoints: this._endpoints(),
     });
 

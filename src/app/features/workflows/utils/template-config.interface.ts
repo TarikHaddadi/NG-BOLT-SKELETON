@@ -39,7 +39,6 @@ export interface ChatTemplateConfig extends BaseTemplateConfig {
   initialMessages?: ChatMessage[];
   currentUser?: ChatSender;
   endpoints?: Partial<ChatEndpoints>;
-  useMockData?: boolean;
 }
 
 /**
@@ -50,7 +49,6 @@ export interface CompareTemplateConfig extends BaseTemplateConfig {
   mode?: 'upload' | 'preloaded';
   result?: ComparisonResult;
   endpoints?: Partial<CompareEndpoints>;
-  useMockData?: boolean;
 }
 
 /**
@@ -61,7 +59,6 @@ export interface SummarizeTemplateConfig extends BaseTemplateConfig {
   mode?: 'upload' | 'preloaded';
   result?: SummaryResult;
   endpoints?: Partial<SummarizeEndpoints>;
-  useMockData?: boolean;
 }
 
 /**

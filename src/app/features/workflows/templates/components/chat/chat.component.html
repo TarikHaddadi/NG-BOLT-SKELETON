@@ -1,4 +1,4 @@
-<div class="chat-container">
+<div class="chat-container" [class.dark-theme]="(isDark$ | async)">
   <!-- Header -->
   <div class="chat-header">
     <div class="chat-header-info">
@@ -27,30 +27,41 @@
     </div>
   </div>
 
-  <!-- Messages Area -->
-  <div 
-    #messagesContainer 
+  <!-- Messages Container -->
+  <div
+    #messagesContainer
     class="chat-messages" 
-    [attr.aria-label]="'chatTpl.messages' | translate"
+    [class.empty]="isEmpty()"
+        [attr.aria-label]="'chatTpl.messages' | translate"
   >
-    @if (isEmpty() && !loading) {
+    <!-- Empty State -->
+    @if (isEmpty()) {
       <div class="chat-empty">
         <mat-icon>chat_bubble_outline</mat-icon>
-        <p>{{ 'chatTpl.empty' | translate }}</p>
+        <p>{{ effectiveEmptyMessage$() | translate }}</p>
       </div>
     }
 
-    @for (message of messages$(); track trackByMessageId($index, message)) {
-      <app-chat-message-tpl
-        [message]="message"
-        [config]="config$()"
-        [currentUserId]="currentUser.id"
-        (delete)="onDeleteMessage($event)"
-        (edit)="onEditMessage($event.id, $event.content)"
-      />
-    }
+    <!-- Messages List -->
+    @if (!isEmpty()) {
+      <div class="messages-list">
+        @for (message of messages$(); track trackByMessageId($index, message)) {
+          <app-chat-message-tpl
+            [message]="message"
+            [currentUserId]="currentUser$().id"
+            [showTimestamp]="config$().showTimestamps !== false"
+            [showAvatar]="config$().showAvatars !== false"
+            [allowMarkdown]="config$().allowMarkdown !== false"
+            [allowEdit]="config$().allowEdit !== false && canEditDelete$()"
+            [allowDelete]="config$().allowDelete !== false && canEditDelete$()"
+            [isDark]="(isDark$ | async) || false"
+            (edit)="onEditMessage($event.id, $event.content)"
+            (delete)="onDeleteMessage($event)"
+          ></app-chat-message-tpl>
+        }
 
-    @if (typing) {
+        <!-- Typing Indicator -->
+        @if (isTyping$()) {
       <div class="chat-typing">
         <div class="typing-indicator">
           <span></span>
@@ -59,16 +70,28 @@
         </div>
         <span class="typing-text">{{ 'chatTpl.typing' | translate }}</span>
       </div>
+        }
+      </div>
     }
   </div>
 
-  <!-- Input Area - Fixed at bottom -->
+  <!-- Input Area -->
   <div class="chat-footer">
     <app-chat-input-tpl
-      [maxLength]="config$().maxLength || 4000"
-      [disabled]="disabled || loading"
-      [loading]="loading"
+      [disabled]="!canSendMessage$() || disabled"
+      [maxLength]="effectiveMaxLength$()"
+      [placeholder]="effectivePlaceholder$()"
+      [enableAttachments]="config$().enableAttachments === true"
+      [loading]="isLoading$()"
       (send)="onSendMessage($event)"
-    />
+      (attachmentSelected)="onAttachmentSelected($event)"
+    ></app-chat-input-tpl>
   </div>
+
+  <!-- Loading Overlay -->
+  @if (isLoading$()) {
+    <div class="loading-overlay">
+      <mat-spinner diameter="40"></mat-spinner>
+    </div>
+  }
 </div>

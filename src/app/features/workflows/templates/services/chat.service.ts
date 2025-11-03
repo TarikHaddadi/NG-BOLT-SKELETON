@@ -1,313 +1,248 @@
-import { Injectable, inject } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
 import { Observable, of, delay, throwError } from 'rxjs';
-import { catchError, tap } from 'rxjs/operators';
+import { catchError } from 'rxjs/operators';
 import {
-    ChatMessage, ChatEndpoints,
-    ChatSendRequest,
-    ChatSendResponse,
-    ChatMessagesResponse
+    ChatMessage,
+    ChatSender,
+    ChatEndpoints,
+    ChatConfig,
 } from '../../utils/chatTpl.interface';
 
+interface SendMessageRequest {
+    content: string;
+    sender: ChatSender;
+}
+
+interface SendMessageResponse {
+    success: boolean;
+    userMessage: ChatMessage;
+    assistantMessage: ChatMessage;
+}
+
+interface DeleteMessageResponse {
+    success: boolean;
+    messageId: string;
+}
+
+interface UploadAttachmentResponse {
+    url: string;
+    filename: string;
+}
 
 @Injectable({
     providedIn: 'root',
 })
 export class ChatService {
-    private http = inject(HttpClient);
+    private endpoints: Partial<ChatEndpoints> = {};
+    private config: Partial<ChatConfig> = {};
 
-    // Default endpoints (can be overridden)
-    private defaultEndpoints: ChatEndpoints = {
-        sendMessage: '/api/chat/send',
-        getMessages: '/api/chat/messages',
-        deleteMessage: '/api/chat/message',
-        editMessage: '/api/chat/message',
-        clearChat: '/api/chat/clear',
+    // Mock responses based on keywords
+    private mockResponses: Record<string, string> = {
+        hello: 'Hello! How can I assist you today?',
+        help: 'I can help you with various tasks. What do you need assistance with?',
+        thanks: 'You\'re welcome! Is there anything else I can help you with?',
+        bye: 'Goodbye! Have a great day!',
+        default: 'I understand. Could you please provide more details?',
     };
 
-    // Use mock data by default (set to false for production)
-    private useMockData = true;
+    constructor(private http: HttpClient) { }
 
-    /**
-     * Configure service
-     */
-    configure(config: { useMockData?: boolean; endpoints?: Partial<ChatEndpoints> }): void {
-        if (config.useMockData !== undefined) {
-            this.useMockData = config.useMockData;
+    configure(options: {
+        endpoints?: Partial<ChatEndpoints>;
+        config?: Partial<ChatConfig>;
+    }): void {
+        if (options.endpoints) {
+            this.endpoints = options.endpoints;
         }
-        if (config.endpoints) {
-            this.defaultEndpoints = { ...this.defaultEndpoints, ...config.endpoints };
+        if (options.config) {
+            this.config = options.config;
         }
     }
 
-    /**
-     * Send a message and get response
-     */
     sendMessage(
-        request: ChatSendRequest,
+        request: SendMessageRequest,
         endpoints?: Partial<ChatEndpoints>
-    ): Observable<ChatSendResponse> {
-        const url = endpoints?.sendMessage || this.defaultEndpoints.sendMessage;
+    ): Observable<SendMessageResponse> {
 
-        if (this.useMockData) {
-            return this.mockSendMessage(request);
+
+        const endpoint = endpoints?.sendMessage || this.endpoints.sendMessage;
+        if (!endpoint) {
+            return throwError(() => new Error('Send endpoint not configured'));
         }
 
-        const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
-
-        return this.http.post<ChatSendResponse>(url, request, { headers }).pipe(
-            tap(response => console.log('Chat message sent:', response)),
+        return this.http.post<SendMessageResponse>(endpoint, request).pipe(
             catchError(error => {
                 console.error('Error sending message:', error);
-                return throwError(() => error);
+                throwError(() => error);
+                return this.mockSendMessage(request);
             })
         );
     }
 
-    /**
-     * Get chat messages (with pagination)
-     */
-    getMessages(
-        chatId: string,
-        options?: { limit?: number; offset?: number },
-        endpoints?: Partial<ChatEndpoints>
-    ): Observable<ChatMessagesResponse> {
-        const url = endpoints?.getMessages || this.defaultEndpoints.getMessages;
-
-        if (this.useMockData) {
-            return this.mockGetMessages(chatId, options);
-        }
-
-        const params: Record<string, string> = { chatId };
-        if (options?.limit) params['limit'] = options.limit.toString();
-        if (options?.offset) params['offset'] = options.offset.toString();
-
-        return this.http.get<ChatMessagesResponse>(url, { params }).pipe(
-            tap(response => console.log('Chat messages loaded:', response)),
-            catchError(error => {
-                console.error('Error loading messages:', error);
-                return throwError(() => error);
-            })
-        );
-    }
-
-    /**
-     * Delete a message
-     */
     deleteMessage(
         messageId: string,
         endpoints?: Partial<ChatEndpoints>
-    ): Observable<{ success: boolean; messageId: string }> {
-        const url = `${endpoints?.deleteMessage || this.defaultEndpoints.deleteMessage}/${messageId}`;
+    ): Observable<DeleteMessageResponse> {
 
-        if (this.useMockData) {
-            return this.mockDeleteMessage(messageId);
+        const endpoint = endpoints?.deleteMessage || this.endpoints.deleteMessage;
+        if (!endpoint) {
+            return throwError(() => new Error('Delete endpoint not configured'));
         }
 
-        return this.http.delete<{ success: boolean; messageId: string }>(url).pipe(
-            tap(response => console.log('Message deleted:', response)),
+        return this.http.delete<DeleteMessageResponse>(`${endpoint}/${messageId}`).pipe(
             catchError(error => {
                 console.error('Error deleting message:', error);
-                return throwError(() => error);
+                throwError(() => error);
+                return this.mockDeleteMessage(messageId);
+
             })
         );
     }
 
-    /**
-     * Edit a message
-     */
     editMessage(
         messageId: string,
-        newContent: string,
+        content: string,
         endpoints?: Partial<ChatEndpoints>
-    ): Observable<ChatMessage> {
-        const url = `${endpoints?.editMessage || this.defaultEndpoints.editMessage}/${messageId}`;
+    ): Observable<Partial<ChatMessage>> {
 
-        if (this.useMockData) {
-            return this.mockEditMessage(messageId, newContent);
+        const endpoint = endpoints?.editMessage || this.endpoints.editMessage;
+        if (!endpoint) {
+            return throwError(() => new Error('Edit endpoint not configured'));
         }
 
-        const body = { content: newContent };
+        return this.http
+            .put<Partial<ChatMessage>>(`${endpoint}/${messageId}`, { content })
+            .pipe(
+                catchError(error => {
+                    console.error('Error editing message:', error);
+                    throwError(() => error);
+                    return this.mockEditMessage(messageId, content);
 
-        return this.http.patch<ChatMessage>(url, body).pipe(
-            tap(response => console.log('Message edited:', response)),
+                })
+            );
+    }
+
+    uploadAttachment(
+        file: File,
+        endpoints?: Partial<ChatEndpoints>
+    ): Observable<UploadAttachmentResponse> {
+
+        const endpoint = endpoints?.uploadAttachment || this.endpoints.uploadAttachment;
+        if (!endpoint) {
+            return throwError(() => new Error('Upload endpoint not configured'));
+        }
+
+        const formData = new FormData();
+        formData.append('file', file);
+
+        return this.http.post<UploadAttachmentResponse>(endpoint, formData).pipe(
             catchError(error => {
-                console.error('Error editing message:', error);
-                return throwError(() => error);
+                console.error('Error uploading attachment:', error);
+                throwError(() => error);
+                return this.mockUploadAttachment(file);
+
             })
         );
     }
 
-    /**
-     * Clear chat history
-     */
-    clearChat(
-        chatId: string,
-        endpoints?: Partial<ChatEndpoints>
-    ): Observable<{ success: boolean; chatId: string }> {
-        const url = `${endpoints?.clearChat || this.defaultEndpoints.clearChat}/${chatId}`;
-
-        if (this.useMockData) {
-            return this.mockClearChat(chatId);
-        }
-
-        return this.http.delete<{ success: boolean; chatId: string }>(url).pipe(
-            tap(response => console.log('Chat cleared:', response)),
-            catchError(error => {
-                console.error('Error clearing chat:', error);
-                return throwError(() => error);
-            })
-        );
-    }
-
-    /**
-     * Generate bot response (AI integration point)
-     */
-    generateResponse(userMessage: string): Observable<string> {
-        if (this.useMockData) {
-            return this.mockGenerateResponse(userMessage);
-        }
-
-        // TODO: Integrate with actual AI service (OpenAI, Azure OpenAI, etc.)
-        return of(this.generateMockBotResponse(userMessage)).pipe(delay(1500));
-    }
-
-    // ============================================================================
-    // MOCK DATA METHODS
-    // ============================================================================
-
-
-    private mockSendMessage(request: ChatSendRequest): Observable<ChatSendResponse> {
+    // Mock implementations
+    private mockSendMessage(request: SendMessageRequest): Observable<SendMessageResponse> {
         const userMessage: ChatMessage = {
             id: this.generateId(),
             content: request.content,
             sender: request.sender,
             timestamp: new Date(),
-            metadata: request.metadata,
         };
 
+        const assistantResponse = this.generateMockResponse(request.content);
         const assistantMessage: ChatMessage = {
             id: this.generateId(),
-            content: this.generateMockBotResponse(request.content),
+            content: assistantResponse,
             sender: {
                 id: 'assistant',
-                name: 'AI Assistant',
-                type: 'assistant' as const,
+                name: 'Assistant',
+                type: 'assistant',
             },
-            timestamp: new Date(),
+            timestamp: new Date(Date.now() + 1000),
         };
 
-        return of({
+        const response: SendMessageResponse = {
+            success: true,
             userMessage,
             assistantMessage,
-            timestamp: new Date(),
-        }).pipe(delay(1500));
+        };
+
+        // Simulate network delay respecting maxLength config
+        const delayTime = this.config.maxLength && request.content.length > this.config.maxLength / 2
+            ? 2000
+            : 1000;
+
+        return of(response).pipe(delay(delayTime));
     }
 
-
-    private mockGetMessages(
-        chatId: string,
-        options?: { limit?: number; offset?: number }
-    ): Observable<ChatMessagesResponse> {
-        const mockMessages = this.generateMockMessages();
-        const limit = options?.limit || 50;
-        const offset = options?.offset || 0;
-
-        const paginatedMessages = mockMessages.slice(offset, offset + limit);
-
-        return of({
-            messages: paginatedMessages,
-            total: mockMessages.length,
-            hasMore: offset + limit < mockMessages.length,
-        }).pipe(delay(500));
-    }
-
-    private mockDeleteMessage(messageId: string): Observable<{ success: boolean; messageId: string }> {
+    private mockDeleteMessage(messageId: string): Observable<DeleteMessageResponse> {
         return of({
             success: true,
             messageId,
         }).pipe(delay(300));
     }
 
-    private mockEditMessage(messageId: string, newContent: string): Observable<ChatMessage> {
+    private mockEditMessage(
+        messageId: string,
+        content: string
+    ): Observable<Partial<ChatMessage>> {
         return of({
             id: messageId,
-            content: newContent,
-            sender: {
-                id: 'user-1',
-                name: 'You',
-                type: 'user' as const,
-            },
-            timestamp: new Date(),
+            content,
             edited: true,
+            timestamp: new Date(),
         }).pipe(delay(300));
     }
 
+    private mockUploadAttachment(file: File): Observable<UploadAttachmentResponse> {
+        // Simulate upload delay based on file size
+        const uploadDelay = Math.min(1000 + (file.size / 10000), 3000);
 
-    private mockClearChat(chatId: string): Observable<{ success: boolean; chatId: string }> {
+        // Mock URL generation
+        const mockUrl = `https://mock-storage.example.com/uploads/${Date.now()}-${file.name}`;
+
         return of({
-            success: true,
-            chatId,
-        }).pipe(delay(300));
+            url: mockUrl,
+            filename: file.name,
+        }).pipe(delay(uploadDelay));
     }
 
-    private mockGenerateResponse(userMessage: string): Observable<string> {
-        return of(this.generateMockBotResponse(userMessage)).pipe(delay(1500));
-    }
-
-    private generateMockBotResponse(userMessage: string): string {
+    private generateMockResponse(userMessage: string): string {
         const lowerMessage = userMessage.toLowerCase();
 
-        if (lowerMessage.includes('hello') || lowerMessage.includes('hi')) {
-            return 'Hello! How can I assist you today?';
-        } else if (lowerMessage.includes('help')) {
-            return "I'm here to help! You can ask me questions or request assistance with various tasks.";
-        } else if (lowerMessage.includes('thank')) {
-            return "You're welcome! Is there anything else I can help you with?";
-        } else if (lowerMessage.includes('bye')) {
-            return 'Goodbye! Feel free to return if you need more assistance.';
-        } else if (lowerMessage.includes('document') || lowerMessage.includes('file')) {
-            return 'I can help you analyze documents, compare files, or summarize content. What would you like to do?';
-        } else if (lowerMessage.includes('compare')) {
-            return 'To compare documents, please upload two files and I will identify the key differences for you.';
-        } else if (lowerMessage.includes('summarize') || lowerMessage.includes('summary')) {
-            return 'I can create summaries in different styles and lengths. Would you like an executive summary, a detailed analysis, or quick bullet points?';
-        } else {
-            return `I understand you said: "${userMessage}". Could you provide more details about what you need help with?`;
+        // Check for keywords
+        for (const [keyword, response] of Object.entries(this.mockResponses)) {
+            if (lowerMessage.includes(keyword)) {
+                return response;
+            }
         }
+
+        // Test markdown support if enabled
+        if (this.config.allowMarkdown !== false && lowerMessage.includes('markdown')) {
+            return `Sure! Here's an example with **bold**, *italic*, and \`code\`:
+      
+            \`\`\`javascript
+            console.log('Hello, World!');
+            \`\`\`
+
+            - List item 1
+            - List item 2`;
+        }
+
+        // Test long messages if maxLength is configured
+        if (this.config.maxLength && lowerMessage.includes('long')) {
+            return 'This is a longer response to test the character limit feature. '.repeat(10);
+        }
+
+        return this.mockResponses?.['default'];
     }
 
-
-    private generateMockMessages(): ChatMessage[] {
-        return [
-            {
-                id: 'msg-1',
-                content: 'Hello! I need help analyzing some documents.',
-                sender: { id: 'user-1', name: 'John Doe', type: 'user' as const },
-                timestamp: new Date('2025-11-03T10:00:00'),
-            },
-            {
-                id: 'msg-2',
-                content: "Hello! I'd be happy to help you analyze documents. What would you like to do?",
-                sender: { id: 'assistant', name: 'AI Assistant', type: 'assistant' as const },
-                timestamp: new Date('2025-11-03T10:00:15'),
-            },
-            {
-                id: 'msg-3',
-                content: 'I want to compare two contract versions and see what changed.',
-                sender: { id: 'user-1', name: 'John Doe', type: 'user' as const },
-                timestamp: new Date('2025-11-03T10:01:00'),
-            },
-            {
-                id: 'msg-4',
-                content:
-                    'Perfect! Please upload both contract versions, and I will identify all the differences for you.',
-                sender: { id: 'assistant', name: 'AI Assistant', type: 'assistant' as const },
-                timestamp: new Date('2025-11-03T10:01:20'),
-            },
-        ];
-    }
-    
     private generateId(): string {
         return `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
     }

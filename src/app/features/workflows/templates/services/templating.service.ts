@@ -1,4 +1,4 @@
-import { Inject, Injectable, Type } from '@angular/core';
+import { inject, Inject, Injectable, Type } from '@angular/core';
 import { Observable, map, catchError, of } from 'rxjs';
 
 import { CoreOptions } from '@cadai/pxs-ng-core/interfaces';
@@ -12,16 +12,17 @@ import {
 import { ChatComponent } from '../components/chat/chat.component';
 import { CompareComponent } from '../components/compare/compare.component';
 import { SummarizeComponent } from '../components/summarize/summarize.component';
-import { ChatEndpoints } from '@features/workflows/utils/chatTpl.interface';
-import { CompareEndpoints } from '@features/workflows/utils/compareTpl.interface';
-import { SummarizeEndpoints } from '@features/workflows/utils/summarizeTpl.interface';
+import { ChatEndpoints, ChatMessage } from '@features/workflows/utils/chatTpl.interface';
+import { CompareEndpoints, ComparisonResult } from '@features/workflows/utils/compareTpl.interface';
+import { SummarizeEndpoints, SummaryResult } from '@features/workflows/utils/summarizeTpl.interface';
+import { ChatService } from './chat.service';
 
 
 @Injectable({
   providedIn: 'root',
 })
 export class TemplatingService {
-
+    chatService = inject(ChatService)
   private readonly componentRegistry = new Map<TemplateType, Type<unknown>>([
     ['chat', ChatComponent],
     ['compare', CompareComponent],
@@ -158,7 +159,7 @@ export class TemplatingService {
       templates: [
         {
           type: 'chat',
-          initialMessages: [],
+          initialMessages: this.getMockChatMessages(),
           currentUser: {
             id: 'user-1',
             name: 'You',
@@ -171,7 +172,6 @@ export class TemplatingService {
             editMessage: '/api/chat/message',
             clearChat: '/api/chat/clear',
           },
-          useMockData: true,
           config: {
             showTimestamps: true,
             showAvatars: true,
@@ -194,7 +194,7 @@ export class TemplatingService {
             cancelComparison: '/api/compare/cancel',
             exportComparison: '/api/compare/export',
           },
-          useMockData: true,
+          result:this.getMockComparisonResult(),
           config: {
             allowedFileTypes: ['.pdf', '.docx', '.txt'],
             maxFileSize: 10 * 1024 * 1024,
@@ -212,7 +212,7 @@ export class TemplatingService {
             cancelSummary: '/api/summarize/cancel',
             exportSummary: '/api/summarize/export',
           },
-          useMockData: true,
+          result:this.getMockSummaryResult(),
           config: {
             allowedFileTypes: ['.pdf', '.docx', '.txt', '.md'],
             maxFileSize: 10 * 1024 * 1024,
@@ -238,4 +238,146 @@ export class TemplatingService {
     };
   }
 
+
+  
+  /**
+   * Mock data generators
+   */
+  getMockComparisonResult(): ComparisonResult {
+    return {
+      id: 'comp-123',
+      file1: {
+        key: 'file-1-key',
+        name: 'contract_v1.pdf',
+        size: 2048576,
+        ext: 'pdf',
+        mime: 'application/pdf',
+        url: 'https://storage.example.com/files/contract_v1.pdf',
+        uploadDate: new Date('2025-01-15')
+      },
+      file2: {
+        key: 'file-2-key',
+        name: 'contract_v2.pdf',
+        size: 2156789,
+        ext: 'pdf',
+        mime: 'application/pdf',
+        url: 'https://storage.example.com/files/contract_v2.pdf',
+        uploadDate: new Date('2025-01-20')
+      },
+      differences: [
+        {
+          id: 'diff-1',
+          type: 'modified',
+          section: 'Section 3: Payment Terms',
+          file1Content: 'Payment due within 30 days',
+          file2Content: 'Payment due within 45 days',
+          lineNumber: 42,
+          description: 'Payment term duration changed from 30 to 45 days'
+        },
+        {
+          id: 'diff-2',
+          type: 'added',
+          section: 'Section 5: Confidentiality',
+          file2Content: 'All information shall remain confidential for 5 years',
+          lineNumber: 78,
+          description: 'New confidentiality clause added'
+        },
+        {
+          id: 'diff-3',
+          type: 'removed',
+          section: 'Section 2: Delivery Terms',
+          file1Content: 'Delivery within 14 business days',
+          lineNumber: 28,
+          description: 'Delivery terms section removed'
+        }
+      ],
+      similarity: 87.5,
+      status: 'completed',
+      createdAt: new Date('2025-01-20T10:30:00'),
+      completedAt: new Date('2025-01-20T10:30:45')
+    };
+  }
+
+  getMockSummaryResult(): SummaryResult {
+    return {
+      id: 'summary-123',
+      files: [
+        {
+          key: 'file-1',
+          name: 'quarterly-report.pdf',
+          size: 2048576,
+          ext: 'pdf',
+          mime: 'application/pdf',
+          url: 'https://storage.example.com/files/report.pdf',
+          uploadDate: new Date('2025-10-15')
+        }
+      ],
+      summary: `This quarterly report highlights significant growth across all departments. 
+                Revenue increased by 25% compared to Q3. Key achievements include successful 
+                product launches and market expansion in European markets.`,
+      keyPoints: [
+        'Revenue increased by 25% quarter-over-quarter',
+        'Successful launch of 3 new products',
+        'Market expansion into 5 European countries',
+        'Customer satisfaction rating improved to 4.8/5',
+        'Operating costs reduced by 12%'
+      ],
+      wordCount: {
+        original: 5420,
+        summary: 456,
+        reduction: 91.6
+      },
+      style: 'executive',
+      length: 'medium',
+      language: 'en',
+      status: 'completed',
+      createdAt: new Date('2025-10-20T10:30:00'),
+      completedAt: new Date('2025-10-20T10:31:15')
+    };
+  }
+
+  getMockChatMessages(): ChatMessage[] {
+  return [
+    {
+      id: 'msg-1',
+      content: 'Hello! I need help with document analysis.',
+      sender: {
+        id: 'user-1',
+        name: 'John Doe',
+        type: 'user',
+      },
+      timestamp: new Date('2025-11-03T10:00:00'),
+    },
+    {
+      id: 'msg-2',
+      content: 'Hello! I\'d be happy to help you with document analysis. What would you like to know?',
+      sender: {
+        id: 'assistant',
+        name: 'AI Assistant',
+        type: 'assistant',
+      },
+      timestamp: new Date('2025-11-03T10:00:15'),
+    },
+    {
+      id: 'msg-3',
+      content: 'Can you help me compare two contracts and identify the key differences?',
+      sender: {
+        id: 'user-1',
+        name: 'John Doe',
+        type: 'user',
+      },
+      timestamp: new Date('2025-11-03T10:01:00'),
+    },
+    {
+      id: 'msg-4',
+      content: 'Certainly! I can help you compare contracts. Please upload the two contract documents you\'d like to compare, and I\'ll identify the key differences for you.',
+      sender: {
+        id: 'assistant',
+        name: 'AI Assistant',
+        type: 'assistant',
+      },
+      timestamp: new Date('2025-11-03T10:01:20'),
+    },
+  ];
+}
 }

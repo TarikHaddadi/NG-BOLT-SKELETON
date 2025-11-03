@@ -112,7 +112,6 @@ export class SummarizeComponent implements OnInit, OnDestroy {
     }
 
     @Input() disabled = false;
-    @Input() useMockData = true;
 
     // Outputs
     @Output() fileUploaded = new EventEmitter<SummarizeFile>();
@@ -222,7 +221,6 @@ export class SummarizeComponent implements OnInit, OnDestroy {
 
         // Configure service
         this.summarizeService.configure({
-            useMockData: this.useMockData,
             endpoints: this._endpoints(),
         });
 
