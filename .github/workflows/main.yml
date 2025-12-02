@@ -14,8 +14,6 @@ env:
   NODE_VERSION: '20'
   PKG_PATH: 'package.json'
   CR_REGISTRY: ghcr.io
-  # e.g. ghcr.io/owner/repo
-  CR_REPOSITORY: ${{ github.repository }}
 
 jobs:
   # ---------- Build + Lint + Angular ----------
@@ -33,13 +31,17 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
 
-      - name: Configure npm for Azure Artifacts
-        if: ${{ secrets.BOLT_SECRET != '' }}
+      - name: Configure npm for Azure Artifacts (using BOLT_SECRET)
         env:
           AZURE_ARTIFACTS_PAT: ${{ secrets.BOLT_SECRET }}
         run: |
-          echo "//pkgs.dev.azure.com/cadai/:_authToken=${AZURE_ARTIFACTS_PAT}" > ~/.npmrc
-          echo "always-auth=true" >> ~/.npmrc
+          if [ -n "$AZURE_ARTIFACTS_PAT" ]; then
+            echo "Configuring npm for Azure Artifacts"
+            echo "//pkgs.dev.azure.com/cadai/:_authToken=${AZURE_ARTIFACTS_PAT}" > ~/.npmrc
+            echo "always-auth=true" >> ~/.npmrc
+          else
+            echo "BOLT_SECRET is empty, skipping Azure Artifacts config"
+          fi
 
       - name: Install dependencies & lint
         run: |
@@ -107,16 +109,13 @@ jobs:
 
       - name: Build and push image
         uses: docker/build-push-action@v6
-        env:
-          VERSION: ${{ steps.version.outputs.version }}
-          BRANCH_NAME: ${{ github.ref_name }}
         with:
           context: .
           file: ./Dockerfile
           push: true
           tags: |
-            ${{ env.CR_REGISTRY }}/${{ env.CR_REPOSITORY }}:${{ env.BRANCH_NAME }}-${{ env.VERSION }}
-            ${{ env.CR_REGISTRY }}/${{ env.CR_REPOSITORY }}:latest-${{ env.BRANCH_NAME }}
+            ${{ env.CR_REGISTRY }}/${{ github.repository }}:${{ github.ref_name }}-${{ steps.version.outputs.version }}
+            ${{ env.CR_REGISTRY }}/${{ github.repository }}:latest-${{ github.ref_name }}
 
   # ---------- CSP smoke test ----------
   csp_test:
@@ -150,7 +149,7 @@ jobs:
           VERSION: ${{ steps.version.outputs.version }}
           BRANCH_NAME: ${{ github.ref_name }}
           CR_REGISTRY: ${{ env.CR_REGISTRY }}
-          CR_REPOSITORY: ${{ env.CR_REPOSITORY }}
+          CR_REPOSITORY: ${{ github.repository }}
         run: |
           set -euo pipefail
           IMAGE_TAG="$BRANCH_NAME-$VERSION"
