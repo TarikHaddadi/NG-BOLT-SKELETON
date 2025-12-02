@@ -1217,7 +1217,6 @@ export class WorkflowCanvasDfComponent implements OnInit, OnDestroy, AfterViewIn
     }
   }
 
-
   private simulateRun(runId: string, wf: PipelineWorkflowDTO): void {
     const sim = this.sims.get(runId);
     if (!sim) return;
@@ -1286,6 +1285,7 @@ export class WorkflowCanvasDfComponent implements OnInit, OnDestroy, AfterViewIn
       const idx = sim.ready.indexOf(id);
       if (idx >= 0) sim.ready.splice(idx, 1);
     };
+
     const unlockChildren = (u: string): void => {
       for (const edge of wf.edges) {
         if (edge.source === u) {
@@ -1355,6 +1355,7 @@ export class WorkflowCanvasDfComponent implements OnInit, OnDestroy, AfterViewIn
   private emitRuns(): void {
     this.bus.runs$.next(this.runs());
   }
+
   private makeEdgeId(srcNode: string, srcPort: string, tgtNode: string, tgtPort: string): string {
     return `e-${srcNode}__${srcPort}--${tgtNode}__${tgtPort}`;
   }
@@ -1489,12 +1490,15 @@ export class WorkflowCanvasDfComponent implements OnInit, OnDestroy, AfterViewIn
     const keptEdges = edges.filter(e => keepIds.has(e.source) && keepIds.has(e.target));
     return { nodes: keptNodes, edges: keptEdges };
   }
+
   private isFile(v: unknown): v is File {
     return typeof File !== 'undefined' && v instanceof File;
   }
+
   private isBlob(v: unknown): v is Blob {
     return typeof Blob !== 'undefined' && v instanceof Blob;
   }
+
   private isArrayOfFiles(v: unknown): v is File[] {
     return Array.isArray(v) && v.length > 0 && this.isFile(v[0]);
   }

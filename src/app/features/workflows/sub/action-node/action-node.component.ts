@@ -282,7 +282,7 @@ getInvalidFieldLabels(): string[] {
           validators: undefined,
           errorMessages: {required: "files are mandatory"}
         }),
-        this.fields.getDropdownField({
+       /*  this.fields.getDropdownField({
           name: 'workflows',
           label: 'Based on workflow',
           placeholder: 'form.placeholders.role',
@@ -304,7 +304,7 @@ getInvalidFieldLabels(): string[] {
           validators: undefined,
           color: "primary",
           layoutClass: "primary",
-        }),
+        }), */
       ];
 
       this.formInputs.reset({}, { emitEvent: false });
