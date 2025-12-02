@@ -92,7 +92,7 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
 
       - name: Read version
-      id: version
+        id: version
         env:
           PKG_PATH: ${{ env.PKG_PATH }}
         run: |
