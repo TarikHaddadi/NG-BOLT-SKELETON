@@ -36,9 +36,16 @@ jobs:
           AZURE_ARTIFACTS_PAT: ${{ secrets.AZURE_ARTIFACT_PAT }}
         run: |
           if [ -n "$AZURE_ARTIFACTS_PAT" ]; then
-            echo "Configuring npm for Azure Artifacts"
-            echo "//pkgs.dev.azure.com/cadai/:_authToken=${AZURE_ARTIFACTS_PAT}" > ~/.npmrc
-            echo "always-auth=true" >> ~/.npmrc
+            echo "Configuring npm for Azure Artifacts into project .npmrc"
+            # Append token to the existing .npmrc (which already has registry config)
+            {
+              echo ""
+              echo "//pkgs.dev.azure.com/cadai/:_authToken=${AZURE_ARTIFACTS_PAT}"
+              echo "always-auth=true"
+            } >> .npmrc
+
+            echo "Final .npmrc:"
+            cat .npmrc
           else
             echo "AZURE_ARTIFACT_PAT is empty, skipping Azure Artifacts config"
           fi
