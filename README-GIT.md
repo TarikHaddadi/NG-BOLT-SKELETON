@@ -72,7 +72,6 @@ The repo contains a `.npmrc` at root with registry configuration (no secrets):
 registry=https://registry.npmjs.org/
 
 @cadai:registry=https://pkgs.dev.azure.com/cadai/Socle/_packaging/PXS-NG-CORE/npm/registry/
-@cadai:registry=https://pkgs.dev.azure.com/cadai/Socle/_packaging/PXS-NG-STARTER-APP/npm/registry/
 ```
 
 Authentication is injected at CI time via a **Personal Access Token (PAT)**.
