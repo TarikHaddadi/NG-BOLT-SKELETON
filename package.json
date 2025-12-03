@@ -1,6 +1,6 @@
 {
   "name": "psx-ng-skeleton",
-  "version": "1.9.350",
+  "version": "1.9.351",
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
