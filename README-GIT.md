@@ -27,7 +27,7 @@ RUN npm ci
 RUN npm run build -- --configuration=production
 
 FROM nginx:alpine
-COPY --from=builder /app/dist/acd /usr/share/nginx/html
+COPY --from=builder /app/dist/pxs-ng-skeleton /usr/share/nginx/html
 COPY nginx/default.conf.template /etc/nginx/conf.d/default.conf.template
 COPY docker-entrypoint.sh /docker-entrypoint.sh
 RUN chmod +x /docker-entrypoint.sh
@@ -39,7 +39,7 @@ ENTRYPOINT ["/docker-entrypoint.sh"]
 The Angular build output is expected at:
 
 ```text
-dist/acd
+dist/pxs-ng-skeleton
 ```
 
 ### 1.2 Environment config files
@@ -98,15 +98,15 @@ pr:
 ```yaml
 variables:
   NODE_VERSION: '20.x'
-  DOCKER_REPOSITORY: 'pxs-acd-app'
+  DOCKER_REPOSITORY: 'pxs-ng-starter-app'
   DOCKER_SERVICE_CONNECTION: 'FrontSocleServiceConn'
   PKG_PATH: 'package.json'
-  APP_NAME: 'pxs-acd-app'
+  APP_NAME: 'pxs-ng-starter-app'
   RELEASE_TYPE: 'patch'  # default release type; can be overridden
 ```
 
 - **DOCKER_SERVICE_CONNECTION**: name of the Docker registry service connection pointing to the Azure Container Registry (ACR).
-- **DOCKER_REPOSITORY**: repository name inside the registry (e.g. `pxs-acd-app`).
+- **DOCKER_REPOSITORY**: repository name inside the registry (e.g. `pxs-ng-starter-app`).
 - **PKG_PATH**: path to the app's `package.json` used to read the version.
 - **RELEASE_TYPE**: type of version bump (patch/minor/major) for automated releases.
 
@@ -125,8 +125,8 @@ Main steps:
 4. Copy the correct `config.*.json` based on `$(Build.SourceBranchName)` and run Angular build.
 5. Read `version` from `package.json` and expose it as `APP_VERSION`.
 6. `Docker@2` builds and pushes image to the configured ACR with tags:
-   - `<branch>-acd-<version>` (e.g. `develop-acd-1.9.4`)
-   - `latest-acd-<branch>` (e.g. `latest-acd-develop`)
+   - `<branch>-pxs-ng-skeleton-<version>` (e.g. `develop-pxs-ng-skeleton-1.9.4`)
+   - `latest-pxs-ng-skeleton-<branch>` (e.g. `latest-pxs-ng-skeleton-develop`)
 7. **Push release commit + tags** - only on develop (not PRs, not already a release commit)
 
 **Note**: Docker build/push is skipped for Pull Requests (condition: `ne(variables['Build.Reason'], 'PullRequest')`).
@@ -229,14 +229,14 @@ The `release` job runs after `build_app` succeeds and:
 - Repo: `ghcr.io/<owner>/<repo>` (lowercased in the workflow).
 - Tags:
 
-  - `<safe-branch>-acd-<version>` (slashes in branch names are replaced by `-`)
-  - `latest-acd-<safe-branch>`
+  - `<safe-branch>-psx-ng-skeleton-<version>` (slashes in branch names are replaced by `-`)
+  - `latest-psx-ng-skeleton-<safe-branch>`
 
 Example:
 
 ```text
-ghcr.io/your_tenant/ng-bolt-skeleton:develop-acd-1.9.4
-ghcr.io/your_tenant/ng-bolt-skeleton:latest-acd-develop
+ghcr.io/your_tenant/your_repo:develop-psx-ng-skeleton-1.9.4
+ghcr.io/your_tenant/your_repo:latest-psx-ng-skeleton-develop
 ```
 
 The workflow uses `docker/login-action` and `docker/build-push-action` with `GITHUB_TOKEN` to push to GHCR.
@@ -333,7 +333,7 @@ This section explains step-by-step what happens when the CI/CD pipeline runs, he
 ✅ Step 7: Build Angular app
    → Copies config.dev.json to config.json (for develop branch)
    → Runs: npm run build -- --configuration=development
-   → Output: dist/acd/
+   → Output: dist/pxs-ng-skeleton/
 
 ✅ Step 8: Read version from package.json
    → Extracts version (e.g., 2.1.5)
@@ -342,8 +342,8 @@ This section explains step-by-step what happens when the CI/CD pipeline runs, he
 ✅ Step 9: Build & Push Docker image
    ⚠️  Skipped on PRs
    → Builds Docker image using Dockerfile
-   → Tags: develop-acd-2.1.5, latest-acd-develop
-   → Pushes to Azure Container Registry (pxs-acd-app)
+   → Tags: develop-psx-ng-skeleton-2.1.5, latest-psx-ng-skeleton-develop
+   → Pushes to Azure Container Registry (pxs-ng-starter-app)
 
 ✅ Step 10: Push release commit + tags
    ⚠️  ONLY on develop branch (Azure), not PRs, not release commits
@@ -374,7 +374,7 @@ Job 3: docker_build (only on master/develop/staging/uat, not PRs)
 ✅ Install & build Angular with environment config
 ✅ Read version from package.json
 ✅ Build & push Docker image to GHCR
-   → Tags: develop-acd-2.1.5, latest-acd-develop
+   → Tags: develop-psx-ng-skeleton-2.1.5, latest-psx-ng-skeleton-develop
 ```
 
 ### 5.3 What happens on a Pull Request?
@@ -447,10 +447,10 @@ Look for in Step 9 logs:
 
 ```
 Successfully built a1b2c3d4e5f6
-Successfully tagged pxs-acd-app:develop-acd-2.1.5
-Successfully tagged pxs-acd-app:latest-acd-develop
-Pushing develop-acd-2.1.5...
-Pushing latest-acd-develop...
+Successfully tagged pxs-ng-starter-app:develop-psx-ng-skeleton-2.1.5
+Successfully tagged pxs-ng-starter-app:latest-psx-ng-skeleton-develop
+Pushing develop-psx-ng-skeleton-2.1.5...
+Pushing latest-psx-ng-skeleton-develop...
 ```
 
 #### ⏭️ **Skipped version bump** (not on develop branch in Azure)
@@ -488,8 +488,8 @@ Exiting pipeline to prevent infinite loop
   - Commit with message `chore(release): v<version> – CI release <branch>`
 - Docker tags follow the pattern:
 
-  - `<branch>-acd-<version>` (e.g., `develop-acd-1.9.4`, `master-acd-1.9.4`)
-  - `latest-acd-<branch>` (e.g., `latest-acd-develop`, `latest-acd-master`)
+  - `<branch>-psx-ng-skeleton-<version>` (e.g., `develop-psx-ng-skeleton-1.9.4`, `master-psx-ng-skeleton-1.9.4`)
+  - `latest-psx-ng-skeleton-<branch>` (e.g., `latest-psx-ng-skeleton-develop`, `latest-psx-ng-skeleton-master`)
 
 - Branch names with slashes (e.g. `feature/login`) are sanitized in GitHub workflow by replacing `/` with `-` for Docker tags.
 - **Azure Pipelines**: Pushes release commits and tags only on `develop` branch.
