@@ -1,7 +1,7 @@
-# PSX-NG-SKELETON – Angular 19 Skeleton
->_Last updated: 2025-09-02_
+# NG-BOLT-SKELETON – Angular 19+ Skeleton
+>_Last updated: 2025-12-04_
 
-> 🚀 Modern Angular 19 project template with runtime environment configs, standalone components, NgRx state management, dynamic forms, internationalization, and full CI/CD support.
+> 🚀 Modern Angular 19+ project template with runtime environment configs, standalone components, NgRx state management, dynamic forms, internationalization, and full CI/CD support.
 
 # NPMRC
 
@@ -391,5 +391,5 @@ Legend: **✅ Done** · **🟡 Ongoing** · **❌ To do**
 ## 🧑‍💻 Author
 
 **Angular Product Skeleton**  
-Built by **Tarik Haddadi** using Angular 19 and modern best practices (2025).
+Built by **Tarik Haddadi** using Angular 19+ and modern best practices (2025).
 
